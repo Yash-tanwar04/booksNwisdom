@@ -23,7 +23,16 @@
             "content": [
               {
                 "type": "text",
-                "text": "Ma"
+                "text": "Mart boy"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Smart boy"
               }
             ]
           }
@@ -38,7 +47,7 @@
       "reading_time_minutes": 1,
       "views_count": 0,
       "created_at": "2026-10-29T13:03:26.975Z",
-      "updated_at": "2026-10-29T13:03:26.975Z",
+      "updated_at": "2026-10-29T13:03:32.655Z",
       "author_id": "admin-1"
     },
     {
