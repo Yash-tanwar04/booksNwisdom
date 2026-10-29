@@ -19,7 +19,7 @@ import { getAdminStats, getAllArticlesAdmin, getSiteSettings } from '@/lib/db';
 import { formatDate } from '@/lib/utils';
 import { WashiTape } from '@/components/decorations/WashiTape';
 import { FloralAccent } from '@/components/decorations/FloralAccent';
-import { SupabaseStatusBanner } from '@/components/admin/SupabaseStatusBanner';
+import { GitHubSyncBanner } from '@/components/admin/GitHubSyncBanner';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic admin dashboard
@@ -35,8 +35,8 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Live Cloud Database Health Status */}
-      <SupabaseStatusBanner />
+      {/* Git-Backed Cloud Persistence Status */}
+      <GitHubSyncBanner />
 
       {/* Welcome Banner */}
       <div className="paper-card p-6 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-sm">

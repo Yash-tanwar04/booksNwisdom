@@ -35,11 +35,17 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'homepage' | 'social' | 'seo' | 'migration' | 'database'>('general');
 
-  // Supabase Database State
+  // Supabase Database & GitHub State
   const [dbStatus, setDbStatus] = useState<any>(null);
   const [dbLoading, setDbLoading] = useState(false);
   const [sqlContent, setSqlContent] = useState<string>('');
   const [sqlCopied, setSqlCopied] = useState(false);
+
+  // GitHub Cloud Sync State
+  const [ghStatus, setGhStatus] = useState<any>(null);
+  const [ghTokenInput, setGhTokenInput] = useState('');
+  const [ghLoading, setGhLoading] = useState(false);
+  const [ghMsg, setGhMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // WordPress Migration State
   const [wpJsonInput, setWpJsonInput] = useState('');
@@ -215,6 +221,52 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
     }
   };
 
+  const loadGhInfo = async () => {
+    setGhLoading(true);
+    try {
+      const res = await fetch('/api/github/token', { cache: 'no-store' });
+      const data = await res.json();
+      setGhStatus(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGhLoading(false);
+    }
+  };
+
+  const handleSaveGhToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ghTokenInput.trim()) return;
+    setGhLoading(true);
+    setGhMsg(null);
+    try {
+      const res = await fetch('/api/github/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: ghTokenInput }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setGhMsg({ type: 'success', text: data.message || 'GitHub Token connected!' });
+        setGhTokenInput('');
+        loadGhInfo();
+      } else {
+        setGhMsg({ type: 'error', text: data.error || 'Connection failed.' });
+      }
+    } catch (err: any) {
+      setGhMsg({ type: 'error', text: err.message || 'Failed to save token.' });
+    } finally {
+      setGhLoading(false);
+    }
+  };
+
+  const handleDisconnectGh = async () => {
+    if (!confirm('Disconnect GitHub token from this browser?')) return;
+    await fetch('/api/github/token', { method: 'DELETE' });
+    setGhMsg({ type: 'success', text: 'GitHub Token disconnected.' });
+    loadGhInfo();
+  };
+
   const handleCopySql = () => {
     if (!sqlContent) return;
     navigator.clipboard.writeText(sqlContent);
@@ -232,14 +284,17 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
           { id: 'social', label: 'Social Links' },
           { id: 'seo', label: 'SEO Defaults' },
           { id: 'migration', label: 'Backup & WordPress Tools' },
-          { id: 'database', label: 'Supabase Database' },
+          { id: 'database', label: 'GitHub Cloud Sync' },
         ].map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => {
               setActiveTab(tab.id as any);
-              if (tab.id === 'database') loadDbInfo();
+              if (tab.id === 'database') {
+                loadGhInfo();
+                loadDbInfo();
+              }
             }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeTab === tab.id
@@ -658,114 +713,160 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
             </div>
           )}
 
-          {/* TAB 6: SUPABASE DATABASE & CLOUD SYNC */}
+          {/* TAB 6: GIT-BACKED CLOUD SYNC (ZERO DATABASE) */}
           {activeTab === 'database' && (
             <div className="space-y-6">
               <div>
                 <h3 className="font-serif text-xl font-bold text-brown-deep dark:text-night-text flex items-center gap-2">
                   <Database className="w-5 h-5 text-rose-muted" />
-                  <span>Supabase PostgreSQL Cloud Integration</span>
+                  <span>Git-Backed Cloud Sync (Zero Database Setup)</span>
                 </h3>
                 <p className="text-xs text-brown-muted dark:text-night-muted mt-1">
-                  Connect Books&Wisdom with your Supabase database so your published articles synchronize permanently across all Vercel servers and visitor devices.
+                  Books&Wisdom stores your blogs directly in your GitHub repository (<code className="font-mono">Yash-tanwar04/booksNwisdom</code>). No external databases, no SQL migrations, no queries.
                 </p>
               </div>
 
-              {/* Status Indicator */}
+              {/* GitHub Status Card */}
               <div className="p-5 rounded-2xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-serif text-base font-bold text-brown-deep dark:text-night-text flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-rose-muted" />
-                    <span>Live Database Connection Status</span>
+                    <span>GitHub Repository Connection</span>
                   </h4>
                   <button
                     type="button"
-                    onClick={loadDbInfo}
-                    disabled={dbLoading}
+                    onClick={loadGhInfo}
+                    disabled={ghLoading}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-paper-border hover:bg-paper-warm dark:hover:bg-night-surface text-brown-muted transition-colors disabled:opacity-50"
                   >
-                    <RefreshCw className={`w-3 h-3 ${dbLoading ? 'animate-spin' : ''}`} />
-                    <span>Check Connection</span>
+                    <RefreshCw className={`w-3 h-3 ${ghLoading ? 'animate-spin' : ''}`} />
+                    <span>Refresh Status</span>
                   </button>
                 </div>
 
-                {dbLoading ? (
+                {ghLoading ? (
                   <div className="flex items-center gap-2 text-xs text-brown-muted py-3">
                     <Loader2 className="w-4 h-4 animate-spin text-rose-muted" />
-                    <span>Testing Supabase connection...</span>
+                    <span>Checking GitHub status...</span>
                   </div>
-                ) : dbStatus?.status === 'client_initialized' && dbStatus?.error ? (
-                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs space-y-2 text-amber-900 dark:text-amber-200">
-                    <div className="flex items-center gap-2 font-bold text-amber-950 dark:text-amber-100">
-                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Schema Migration Required (Tables Missing)</span>
+                ) : ghStatus?.configured ? (
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs space-y-3 text-emerald-900 dark:text-emerald-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 font-bold text-emerald-950 dark:text-emerald-100">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>Connected to {ghStatus.repo || 'Yash-tanwar04/booksNwisdom'}</span>
+                      </div>
+                      <span className="text-[10px] font-mono uppercase tracking-wider bg-emerald-200/80 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 px-2 py-0.5 rounded-full font-semibold">
+                        Source: {ghStatus.source === 'env' ? 'Vercel Env' : 'Browser Session'}
+                      </span>
                     </div>
+
                     <p className="leading-relaxed">
-                      Supabase connected successfully, but the required tables (<code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">public.articles</code>, <code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">public.site_settings</code>) have not been created in your Supabase project yet.
+                      Every time you publish or edit a blog in the Admin Studio, it is committed directly to your GitHub repository and deployed to Vercel.
                     </p>
-                    <p className="font-mono text-[11px] text-amber-700 dark:text-amber-300">
-                      Error: {dbStatus.error.message || 'PGRST205'}
-                    </p>
-                  </div>
-                ) : dbStatus?.status === 'client_initialized' && dbStatus?.count !== null ? (
-                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs space-y-1 text-emerald-900 dark:text-emerald-200">
-                    <div className="flex items-center gap-2 font-bold text-emerald-950 dark:text-emerald-100">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Supabase Cloud Connected & Ready!</span>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <a
+                        href="https://github.com/Yash-tanwar04/booksNwisdom/blob/main/.data/db.json"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-night-card border border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-100/50 transition-colors"
+                      >
+                        <span>Open .data/db.json on GitHub</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                      {ghStatus.source === 'cookie' && (
+                        <button
+                          type="button"
+                          onClick={handleDisconnectGh}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                        >
+                          Disconnect Token
+                        </button>
+                      )}
                     </div>
-                    <p>
-                      {dbStatus.count} article{dbStatus.count === 1 ? '' : 's'} currently stored in your Supabase database. Cloud sync is 100% active.
-                    </p>
                   </div>
                 ) : (
-                  <div className="p-4 rounded-xl bg-paper-warm/50 border border-paper-border text-xs text-brown-muted space-y-1">
-                    <p className="font-medium text-brown-deep dark:text-night-text">Local Storage Mode Active</p>
-                    <p>Articles are currently saved to local storage.</p>
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 space-y-2">
+                      <div className="flex items-center gap-2 font-bold text-amber-950 dark:text-amber-100">
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>GitHub Token Not Connected</span>
+                      </div>
+                      <p className="leading-relaxed">
+                        To enable seamless publishing from Vercel without any database, connect your GitHub Personal Access Token below or add <code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">GITHUB_TOKEN</code> to your Vercel Environment Variables.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleSaveGhToken} className="space-y-3">
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-semibold text-brown-deep dark:text-night-text uppercase tracking-wider">
+                            Paste GitHub Personal Access Token
+                          </label>
+                          <a
+                            href="https://github.com/settings/tokens/new?scopes=repo&description=BooksAndWisdom-Vercel"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-rose-muted hover:underline inline-flex items-center gap-1 font-medium"
+                          >
+                            <span>Generate Token on GitHub (Pre-configured)</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                        <input
+                          type="password"
+                          value={ghTokenInput}
+                          onChange={(e) => setGhTokenInput(e.target.value)}
+                          placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                          className="w-full px-3.5 py-2.5 rounded-xl border border-paper-border dark:border-night-border bg-paper-warm/40 dark:bg-night-surface text-brown-deep dark:text-night-text text-xs font-mono outline-none focus:border-rose-muted"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={ghLoading || !ghTokenInput.trim()}
+                        className="px-5 py-2.5 rounded-xl bg-brown-deep hover:bg-rose-deep text-paper-warm text-xs font-semibold transition-colors disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {ghLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                        <span>Save & Test GitHub Connection</span>
+                      </button>
+                    </form>
+                  </div>
+                )}
+
+                {ghMsg && (
+                  <div
+                    className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                      ghMsg.type === 'success'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-red-50 text-red-700 border border-red-200'
+                    }`}
+                  >
+                    {ghMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+                    <span>{ghMsg.text}</span>
                   </div>
                 )}
               </div>
 
-              {/* 1-Click Migration Guide */}
-              <div className="p-5 rounded-2xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div>
-                    <h4 className="font-serif text-base font-bold text-brown-deep dark:text-night-text">
-                      1-Click Supabase SQL Setup (15 Seconds)
-                    </h4>
-                    <p className="text-xs text-brown-muted dark:text-night-muted mt-0.5">
-                      Copy this script and paste it into the Supabase SQL editor to create the required tables and security rules.
-                    </p>
+              {/* How it works explanation */}
+              <div className="p-5 rounded-2xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border space-y-3">
+                <h4 className="font-serif text-base font-bold text-brown-deep dark:text-night-text">
+                  How Git-Backed Publishing Works
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-brown-muted dark:text-night-muted">
+                  <div className="p-3.5 rounded-xl bg-paper-warm/50 dark:bg-night-surface space-y-1">
+                    <p className="font-semibold text-brown-deep dark:text-night-text">1. Write in Studio</p>
+                    <p>Create or edit blog posts in the author studio with formatting, blockquotes, and images.</p>
                   </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCopySql}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-muted hover:bg-rose-muted/90 text-white transition-colors"
-                    >
-                      {sqlCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{sqlCopied ? 'Copied SQL!' : 'Copy SQL Script'}</span>
-                    </button>
-                    <a
-                      href="https://supabase.com/dashboard/project/ixyusueytlwqricjjgxw/sql/new"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold border border-brown-muted/30 dark:border-night-border hover:bg-paper-warm dark:hover:bg-night-surface text-brown-deep dark:text-night-text transition-colors"
-                    >
-                      <span>Open SQL Editor</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
+                  <div className="p-3.5 rounded-xl bg-paper-warm/50 dark:bg-night-surface space-y-1">
+                    <p className="font-semibold text-brown-deep dark:text-night-text">2. Commits to Git</p>
+                    <p>Next.js commits the post directly to your GitHub repository in <code className="font-mono">.data/db.json</code>.</p>
                   </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] text-brown-muted">
-                    <span className="font-mono">supabase/migrations/001_initial_schema.sql</span>
-                    <span>126 lines</span>
+                  <div className="p-3.5 rounded-xl bg-paper-warm/50 dark:bg-night-surface space-y-1">
+                    <p className="font-semibold text-brown-deep dark:text-night-text">3. Instant Live Site</p>
+                    <p>The main site reads from Git, showing the new post immediately to all visitors worldwide.</p>
                   </div>
-                  <pre className="p-4 rounded-xl bg-night-bg text-night-text font-mono text-xs leading-relaxed max-h-64 overflow-y-auto border border-night-border select-all">
-                    {sqlContent || '-- Loading schema script...'}
-                  </pre>
                 </div>
               </div>
             </div>

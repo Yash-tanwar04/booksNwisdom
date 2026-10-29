@@ -9,6 +9,7 @@ import {
 } from './seed-data';
 import { createServerClient } from './supabase/server';
 import { calculateReadingTime, extractTextFromContent, slugify } from './utils';
+import { fetchFromGitHubRaw, commitToGitHub, getGitHubToken } from './github';
 
 interface LocalDatabase {
   articles: Article[];
@@ -142,6 +143,43 @@ function saveLocalDb(data: LocalDatabase): void {
   }
 }
 
+let lastGitHubFetchTimestamp = 0;
+
+export async function loadDbAsync(): Promise<LocalDatabase> {
+  const now = Date.now();
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
+
+  // During local development or Next.js build time, read bundled local file directly
+  if (!isServerless || process.env.NEXT_PHASE === 'phase-production-build') {
+    return loadLocalDb();
+  }
+
+  if (now - lastGitHubFetchTimestamp > 5000 || !globalThis.__BW_DB_CACHE__) {
+    lastGitHubFetchTimestamp = now;
+    try {
+      const ghData = await fetchFromGitHubRaw();
+      if (ghData && Array.isArray(ghData.articles) && ghData.articles.length > 0) {
+        const normalized: LocalDatabase = {
+          articles: ghData.articles,
+          settings: ghData.settings || ghData.site_settings || { ...INITIAL_SITE_SETTINGS },
+          media: Array.isArray(ghData.media)
+            ? ghData.media
+            : Array.isArray(ghData.media_files)
+            ? ghData.media_files
+            : [...INITIAL_MEDIA],
+        };
+        globalThis.__BW_DB_CACHE__ = normalized;
+        saveLocalDb(normalized);
+        return normalized;
+      }
+    } catch (err) {
+      console.warn('GitHub raw fetch skipped, using local fallback:', err);
+    }
+  }
+
+  return loadLocalDb();
+}
+
 /**
  * Strip fields that might violate Supabase foreign key or UUID constraints
  * (e.g., author_id = 'admin-1' when author_id references auth.users(id))
@@ -253,8 +291,8 @@ export async function getPublishedArticles(options?: {
     }
   }
 
-  // 2. Fallback to Local DB
-  const db = loadLocalDb();
+  // 2. Fallback to Local / Git-Backed DB
+  const db = await loadDbAsync();
 
   let filtered = db.articles.filter((a) => a.status === 'published');
 
@@ -301,7 +339,7 @@ export async function getArticleBySlug(slug: string, includeDrafts = false): Pro
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const article = db.articles.find(
     (a) => a.slug === slug && (includeDrafts || a.status === 'published')
   );
@@ -332,7 +370,7 @@ export async function getArticleById(id: string): Promise<Article | null> {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   return db.articles.find((a) => a.id === id || toDeterministicUuid(a.id) === id) || null;
 }
 
@@ -368,7 +406,7 @@ export async function getAllArticlesAdmin(options?: {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   let list = [...db.articles];
 
   if (status !== 'all') {
@@ -393,7 +431,7 @@ export async function getAllArticlesAdmin(options?: {
 }
 
 export async function saveArticle(input: Partial<Article> & { title: string }): Promise<Article> {
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const now = new Date().toISOString();
 
   // Check if article already exists in local DB or Supabase
@@ -508,6 +546,16 @@ export async function saveArticle(input: Partial<Article> & { title: string }): 
   }
   saveLocalDb(db);
 
+  // 3. Git-Backed Cloud Persistence: commit updated database directly to GitHub
+  const ghToken = getGitHubToken();
+  if (ghToken) {
+    try {
+      await commitToGitHub(db, `Publish reflection: "${savedArticle.title}"`, ghToken);
+    } catch (err) {
+      console.warn('GitHub commit on publish skipped/failed:', err);
+    }
+  }
+
   return savedArticle;
 }
 
@@ -526,12 +574,20 @@ export async function deleteArticle(id: string): Promise<boolean> {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const initialLen = db.articles.length;
   db.articles = db.articles.filter((a) => a.id !== id && toDeterministicUuid(a.id) !== id);
   const deletedInLocal = db.articles.length < initialLen;
   if (deletedInLocal) {
     saveLocalDb(db);
+    const ghToken = getGitHubToken();
+    if (ghToken) {
+      try {
+        await commitToGitHub(db, `Delete reflection: ${id}`, ghToken);
+      } catch (err) {
+        console.warn('GitHub commit on delete skipped/failed:', err);
+      }
+    }
   }
 
   return deletedInSupabase || deletedInLocal;
@@ -580,7 +636,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   return {
     ...INITIAL_SITE_SETTINGS,
     ...db.settings,
@@ -588,7 +644,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 }
 
 export async function updateSiteSettings(input: Partial<SiteSettings>): Promise<SiteSettings> {
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const current = await getSiteSettings();
   const updated: SiteSettings = {
     ...current,
@@ -618,6 +674,16 @@ export async function updateSiteSettings(input: Partial<SiteSettings>): Promise<
 
   db.settings = updated;
   saveLocalDb(db);
+
+  const ghToken = getGitHubToken();
+  if (ghToken) {
+    try {
+      await commitToGitHub(db, 'Update site settings', ghToken);
+    } catch (err) {
+      console.warn('GitHub commit settings skipped/failed:', err);
+    }
+  }
+
   return updated;
 }
 
@@ -641,12 +707,12 @@ export async function getMediaFiles(): Promise<MediaFile[]> {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   return db.media || [];
 }
 
 export async function addMediaFile(file: Omit<MediaFile, 'id' | 'created_at'>): Promise<MediaFile> {
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const newMedia: MediaFile = {
     ...file,
     id: crypto.randomUUID(),
@@ -686,7 +752,7 @@ export async function deleteMediaFile(id: string): Promise<boolean> {
     }
   }
 
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   const initialLen = db.media.length;
   db.media = db.media.filter((m) => m.id !== id);
   const deletedInLocal = db.media.length < initialLen;
@@ -735,7 +801,7 @@ export async function restoreDatabaseBackup(backupData: {
   settings?: SiteSettings;
   media?: MediaFile[];
 }) {
-  const db = loadLocalDb();
+  const db = await loadDbAsync();
   if (Array.isArray(backupData.articles)) {
     db.articles = backupData.articles;
   }
@@ -746,6 +812,15 @@ export async function restoreDatabaseBackup(backupData: {
     db.media = backupData.media;
   }
   saveLocalDb(db);
+
+  const ghToken = getGitHubToken();
+  if (ghToken) {
+    try {
+      await commitToGitHub(db, 'Restore database backup', ghToken);
+    } catch (err) {
+      console.warn('GitHub commit restore skipped/failed:', err);
+    }
+  }
 
   // If Supabase is configured, sync restored items to Supabase
   const supabase = createServerClient();
