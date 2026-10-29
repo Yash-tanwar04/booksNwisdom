@@ -1,6 +1,32 @@
 {
   "articles": [
     {
+      "id": "14bf43f4-f011-4476-b9d1-f84d56f00c07",
+      "title": "CHJRCJ",
+      "subtitle": null,
+      "slug": "chjrcj",
+      "excerpt": "A personal reflection from Books&Wisdom.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph"
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/self-reflection.webp",
+      "status": "draft",
+      "published_at": null,
+      "scheduled_at": null,
+      "seo_title": null,
+      "seo_description": null,
+      "reading_time_minutes": 1,
+      "views_count": 0,
+      "created_at": "2026-10-29T12:33:48.016Z",
+      "updated_at": "2026-10-29T12:33:48.016Z",
+      "author_id": "admin-1"
+    },
+    {
       "id": "art-007",
       "title": "The Quiet Art of Letting Go",
       "subtitle": "Learning to release the versions of life we planned so we can embrace the one unfolding in front of us.",
