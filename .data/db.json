@@ -56,9 +56,15 @@
                     "text": "KBB"
                   }
                 ]
-              },
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
               {
-                "type": "paragraph"
+                "type": "text",
+                "text": "BB.LK"
               }
             ]
           }
@@ -73,7 +79,7 @@
       "reading_time_minutes": 1,
       "views_count": 0,
       "created_at": "2026-10-29T12:50:26.894Z",
-      "updated_at": "2026-10-29T12:50:34.610Z",
+      "updated_at": "2026-10-29T12:50:37.148Z",
       "author_id": "admin-1"
     },
     {
