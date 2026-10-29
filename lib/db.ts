@@ -147,14 +147,14 @@ let lastGitHubFetchTimestamp = 0;
 
 export async function loadDbAsync(): Promise<LocalDatabase> {
   const now = Date.now();
-  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
 
-  // During local development or Next.js build time, read bundled local file directly
-  if (!isServerless || process.env.NEXT_PHASE === 'phase-production-build') {
+  // During Next.js static build time, read bundled local file directly
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
     return loadLocalDb();
   }
 
-  if (now - lastGitHubFetchTimestamp > 5000 || !globalThis.__BW_DB_CACHE__) {
+  // On Vercel runtime or local dev, poll GitHub for latest data
+  if (now - lastGitHubFetchTimestamp > 3000 || !globalThis.__BW_DB_CACHE__) {
     lastGitHubFetchTimestamp = now;
     try {
       const ghData = await fetchFromGitHubRaw();

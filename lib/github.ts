@@ -31,18 +31,43 @@ export function getGitHubToken(): string | null {
 }
 
 /**
- * Fetch the latest database JSON directly from GitHub Raw
+ * Fetch the latest database JSON directly from GitHub API (instant raw JSON without CDN delay)
  */
 export async function fetchFromGitHubRaw(): Promise<any | null> {
+  const token = getGitHubToken();
   try {
-    const res = await fetch(`${GITHUB_RAW_URL}?t=${Date.now()}`, {
+    // 1. Primary: GitHub API with raw accept header (100% real-time, zero Fastly caching)
+    const headers: Record<string, string> = {
+      'User-Agent': 'BooksAndWisdom-Fetcher',
+      Accept: 'application/vnd.github.raw+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const apiRes = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_DB_PATH}?ref=${GITHUB_BRANCH}`,
+      {
+        headers,
+        cache: 'no-store',
+      }
+    );
+
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (data && Array.isArray(data.articles)) {
+        return data;
+      }
+    }
+
+    // 2. Secondary fallback: raw.githubusercontent.com
+    const rawRes = await fetch(`${GITHUB_RAW_URL}?t=${Date.now()}`, {
       cache: 'no-store',
-      headers: {
-        'User-Agent': 'BooksAndWisdom-RawFetcher',
-      },
+      headers: { 'User-Agent': 'BooksAndWisdom-RawFetcher' },
     });
-    if (res.ok) {
-      const data = await res.json();
+    if (rawRes.ok) {
+      const data = await rawRes.json();
       if (data && Array.isArray(data.articles)) {
         return data;
       }
