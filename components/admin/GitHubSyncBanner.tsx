@@ -19,9 +19,35 @@ export function GitHubSyncBanner() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const checkStatus = () => {
-    fetch('/api/github/token', { cache: 'no-store' })
+    const localToken = typeof window !== 'undefined' ? localStorage.getItem('bw_gh_token') || '' : '';
+    const headers: Record<string, string> = {};
+    if (localToken) {
+      headers['x-github-token'] = localToken;
+    }
+
+    fetch('/api/github/token', { cache: 'no-store', headers })
       .then((r) => r.json())
-      .then((data) => setStatus(data))
+      .then((data) => {
+        if (!data.configured && localToken) {
+          // If server didn't have it, auto-sync from localStorage
+          fetch('/api/github/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: localToken }),
+          })
+            .then((res) => res.json())
+            .then((resData) => {
+              if (resData.success) {
+                setStatus({ configured: true, repo: resData.repo, source: 'cookie' });
+              } else {
+                setStatus(data);
+              }
+            })
+            .catch(() => setStatus(data));
+        } else {
+          setStatus(data);
+        }
+      })
       .catch((err) => console.error('Failed to load GitHub status:', err))
       .finally(() => setLoading(false));
   };
@@ -32,7 +58,8 @@ export function GitHubSyncBanner() {
 
   const handleSaveToken = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tokenInput.trim()) return;
+    const cleanToken = tokenInput.trim();
+    if (!cleanToken) return;
 
     setConnecting(true);
     setErrorMsg(null);
@@ -42,11 +69,14 @@ export function GitHubSyncBanner() {
       const res = await fetch('/api/github/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: tokenInput }),
+        body: JSON.stringify({ token: cleanToken }),
       });
 
       const data = await res.json();
       if (res.ok) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('bw_gh_token', cleanToken);
+        }
         setSuccessMsg(data.message || 'Connected successfully!');
         setTokenInput('');
         checkStatus();

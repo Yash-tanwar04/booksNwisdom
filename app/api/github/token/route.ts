@@ -4,12 +4,13 @@ import { GH_COOKIE_NAME, GITHUB_OWNER, GITHUB_REPO, getGitHubToken } from '@/lib
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   const envToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   const cookieStore = cookies();
   const cookieToken = cookieStore.get(GH_COOKIE_NAME)?.value;
+  const headerToken = req.headers.get('x-github-token') || undefined;
 
-  const activeToken = envToken || cookieToken;
+  const activeToken = envToken || cookieToken || headerToken;
 
   if (!activeToken) {
     return NextResponse.json({
@@ -94,12 +95,13 @@ export async function POST(req: Request) {
     }
 
     // Set HTTP-only cookie
+    const isProduction = process.env.NODE_ENV === 'production';
     const cookieStore = cookies();
     cookieStore.set({
       name: GH_COOKIE_NAME,
       value: cleanToken,
       httpOnly: true,
-      secure: false, // allow local dev
+      secure: isProduction,
       sameSite: 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 365, // 1 year

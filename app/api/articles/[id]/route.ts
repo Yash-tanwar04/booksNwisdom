@@ -37,6 +37,7 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const explicitToken = req.headers.get('x-github-token') || undefined;
     const existing = await getArticleById(params.id);
     const body = await req.json();
     const updated = await saveArticle({
@@ -44,7 +45,7 @@ export async function PUT(req: Request, { params }: Params) {
       ...body,
       title: body.title || existing?.title || 'Untitled Reflection',
       id: params.id,
-    });
+    }, explicitToken);
 
     revalidatePath('/', 'layout');
     revalidatePath('/');
@@ -66,7 +67,8 @@ export async function DELETE(req: Request, { params }: Params) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const success = await deleteArticle(params.id);
+    const explicitToken = req.headers.get('x-github-token') || undefined;
+    const success = await deleteArticle(params.id, explicitToken);
     if (!success) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }

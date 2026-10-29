@@ -182,9 +182,15 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
       };
 
       try {
+        const storedGhToken = typeof window !== 'undefined' ? localStorage.getItem('bw_gh_token') || '' : '';
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (storedGhToken) {
+          headers['x-github-token'] = storedGhToken;
+        }
+
         const res = await fetch('/api/articles', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify(payload),
         });
 

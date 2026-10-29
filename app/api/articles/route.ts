@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const explicitToken = req.headers.get('x-github-token') || undefined;
     const body = await req.json();
     const article = await saveArticle({
       id: body.id,
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
       scheduled_at: body.scheduled_at,
       seo_title: body.seo_title,
       seo_description: body.seo_description,
-    });
+    }, explicitToken);
 
     revalidatePath('/', 'layout');
     revalidatePath('/');

@@ -430,7 +430,7 @@ export async function getAllArticlesAdmin(options?: {
   return list;
 }
 
-export async function saveArticle(input: Partial<Article> & { title: string }): Promise<Article> {
+export async function saveArticle(input: Partial<Article> & { title: string }, explicitToken?: string | null): Promise<Article> {
   const db = await loadDbAsync();
   const now = new Date().toISOString();
 
@@ -547,7 +547,7 @@ export async function saveArticle(input: Partial<Article> & { title: string }): 
   saveLocalDb(db);
 
   // 3. Git-Backed Cloud Persistence: commit updated database directly to GitHub
-  const ghToken = getGitHubToken();
+  const ghToken = explicitToken || getGitHubToken();
   if (ghToken) {
     try {
       await commitToGitHub(db, `Publish reflection: "${savedArticle.title}"`, ghToken);
@@ -559,7 +559,7 @@ export async function saveArticle(input: Partial<Article> & { title: string }): 
   return savedArticle;
 }
 
-export async function deleteArticle(id: string): Promise<boolean> {
+export async function deleteArticle(id: string, explicitToken?: string | null): Promise<boolean> {
   let deletedInSupabase = false;
   const supabase = createServerClient();
   if (supabase) {
@@ -580,7 +580,7 @@ export async function deleteArticle(id: string): Promise<boolean> {
   const deletedInLocal = db.articles.length < initialLen;
   if (deletedInLocal) {
     saveLocalDb(db);
-    const ghToken = getGitHubToken();
+    const ghToken = explicitToken || getGitHubToken();
     if (ghToken) {
       try {
         await commitToGitHub(db, `Delete reflection: ${id}`, ghToken);
@@ -643,7 +643,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   };
 }
 
-export async function updateSiteSettings(input: Partial<SiteSettings>): Promise<SiteSettings> {
+export async function updateSiteSettings(input: Partial<SiteSettings>, explicitToken?: string | null): Promise<SiteSettings> {
   const db = await loadDbAsync();
   const current = await getSiteSettings();
   const updated: SiteSettings = {
@@ -675,7 +675,7 @@ export async function updateSiteSettings(input: Partial<SiteSettings>): Promise<
   db.settings = updated;
   saveLocalDb(db);
 
-  const ghToken = getGitHubToken();
+  const ghToken = explicitToken || getGitHubToken();
   if (ghToken) {
     try {
       await commitToGitHub(db, 'Update site settings', ghToken);
