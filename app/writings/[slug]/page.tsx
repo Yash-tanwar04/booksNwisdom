@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { Calendar, Clock, ChevronRight, Heart, ArrowLeft, ArrowRight, Share2 } from 'lucide-react';
 import { getArticleBySlug, getPublishedArticles, getSiteSettings } from '@/lib/db';
 import { formatDate } from '@/lib/utils';
+import { unstable_noStore as noStore } from 'next/cache';
 import { ReadingProgress } from '@/components/articles/ReadingProgress';
 import { ShareButtons } from '@/components/articles/ShareButtons';
 import { ArticleRenderer } from '@/components/articles/ArticleRenderer';
@@ -48,6 +49,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
+  noStore();
   const article = await getArticleBySlug(params.slug);
   if (!article) {
     notFound();

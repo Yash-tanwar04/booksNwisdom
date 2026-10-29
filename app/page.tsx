@@ -1,9 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { unstable_noStore as noStore } from 'next/cache';
 import { ArrowRight, BookOpen, Feather, Sparkles } from 'lucide-react';
 import { getPublishedArticles, getSiteSettings } from '@/lib/db';
-import { ArticleCard } from '@/components/articles/ArticleCard';
+import { LatestWritingsGrid } from '@/components/articles/LatestWritingsGrid';
 import { WashiTape } from '@/components/decorations/WashiTape';
 import { FloralAccent } from '@/components/decorations/FloralAccent';
 import { TornPaper } from '@/components/decorations/TornPaper';
@@ -15,8 +16,6 @@ import {
 } from '@/components/decorations/ScrapbookDetails';
 import {
   FadeInUp,
-  StaggerContainer,
-  StaggerItem,
   TiltPolaroid,
 } from '@/components/animations/Reveal';
 
@@ -24,6 +23,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function HomePage() {
+  noStore();
   const settings = await getSiteSettings();
   const { articles } = await getPublishedArticles({ limit: 4 });
 
@@ -188,30 +188,8 @@ export default async function HomePage() {
             </Link>
           </FadeInUp>
 
-          {/* Staggered Articles Grid */}
-          {articles.length > 0 ? (
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {articles.map((article, idx) => (
-                <StaggerItem key={article.id}>
-                  <ArticleCard
-                    article={article}
-                    withTape={true}
-                    index={idx}
-                  />
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-          ) : (
-            <div className="text-center py-16 paper-card p-8 max-w-lg mx-auto">
-              <FloralAccent size={48} variant="branch" className="mx-auto mb-3 opacity-60" />
-              <h3 className="font-serif text-xl font-bold text-brown-deep dark:text-night-text">
-                A quiet space waiting for words
-              </h3>
-              <p className="mt-2 text-sm text-brown-muted dark:text-night-muted">
-                No writings have been published yet. Check back soon for heartfelt reflections.
-              </p>
-            </div>
-          )}
+          {/* Staggered Articles Grid with Real-Time Background Synchronization */}
+          <LatestWritingsGrid initialArticles={articles} />
 
           {/* Mobile View All Button */}
           <div className="mt-10 text-center sm:hidden">

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import { unstable_noStore as noStore } from 'next/cache';
 import { getPublishedArticles } from '@/lib/db';
 import { WritingsFeed } from '@/components/writings/WritingsFeed';
 import { FloralAccent } from '@/components/decorations/FloralAccent';
@@ -16,6 +17,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AllWritingsPage() {
+  noStore();
   const { articles, total } = await getPublishedArticles({ limit: 6 });
 
   return (

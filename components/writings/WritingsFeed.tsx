@@ -27,6 +27,25 @@ export function WritingsFeed({ initialArticles, totalCount }: WritingsFeedProps)
     setHasMore(initialArticles.length < totalCount);
   }, [initialArticles, totalCount]);
 
+  // Real-time background sync so newly published articles appear immediately
+  useEffect(() => {
+    let active = true;
+    fetch('/api/articles?limit=6', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data && Array.isArray(data.articles) && data.articles.length > 0) {
+          setArticles(data.articles);
+          setOffset(data.articles.length);
+          setHasMore(data.articles.length < (data.total || 0));
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearch(val);

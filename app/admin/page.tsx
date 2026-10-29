@@ -14,6 +14,7 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
+import { unstable_noStore as noStore } from 'next/cache';
 import { getAdminStats, getAllArticlesAdmin, getSiteSettings } from '@/lib/db';
 import { formatDate } from '@/lib/utils';
 import { WashiTape } from '@/components/decorations/WashiTape';
@@ -23,6 +24,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic admin dashboard
 
 export default async function AdminDashboardPage() {
+  noStore();
   const stats = await getAdminStats();
   const allArticles = await getAllArticlesAdmin({ sort: 'newest' });
   const settings = await getSiteSettings();

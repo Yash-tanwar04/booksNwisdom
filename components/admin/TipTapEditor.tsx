@@ -34,6 +34,7 @@ import {
   Check,
   Loader2,
   ArrowLeft,
+  ExternalLink,
   ChevronDown,
   ChevronUp,
   Globe,
@@ -79,6 +80,7 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [publishedSuccessArticle, setPublishedSuccessArticle] = useState<Article | null>(null);
   const [libraryPickerOpen, setLibraryPickerOpen] = useState(false);
 
   // Inline Link & Image Toolbar Drawer States
@@ -416,8 +418,11 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
     const saved = await performSave('published');
     setIsPublishing(false);
     if (saved) {
-      router.push('/admin/writings');
+      setPublishedSuccessArticle(saved);
       router.refresh();
+      setTimeout(() => {
+        router.push('/admin/writings');
+      }, 1800);
     }
   };
 
@@ -510,6 +515,42 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
           </button>
         </div>
       </div>
+
+      {/* Published Celebration Toast Banner */}
+      {publishedSuccessArticle && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-100/95 dark:bg-emerald-950/90 border border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg animate-fade-in z-30">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+              <Check className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="font-serif font-bold text-base text-emerald-950 dark:text-white">
+                Reflection Published Successfully!
+              </p>
+              <p className="text-xs text-emerald-800 dark:text-emerald-200">
+                &ldquo;{publishedSuccessArticle.title}&rdquo; is now live on the main website.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/writings/${publishedSuccessArticle.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-sm"
+            >
+              <span>View Live on Site</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <Link
+              href="/admin/writings"
+              className="px-4 py-2 rounded-xl bg-paper-cream dark:bg-night-card text-brown-deep dark:text-night-text text-xs font-semibold hover:bg-paper-blush transition-colors"
+            >
+              All Blogs
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Main Writing Container */}
       <div className="paper-card p-6 sm:p-10 space-y-6 relative">
