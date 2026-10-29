@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-dm-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-caveat: 'Caveat', cursive;
+  
+  --bg-paper: #FBF3EA;
+  --surface-cream: #FFF9F3;
+  --surface-blush: #F3E1DC;
+  --accent-rose: #D8A5A0;
+  --accent-muted-rose: #B87873;
+  --text-dark: #302622;
+  --text-muted: #88756D;
+  --border-color: #E8D7CC;
+}
+
+.dark {
+  --bg-paper: #231C1A;
+  --surface-cream: #2D2421;
+  --surface-blush: #382D29;
+  --accent-rose: #D8A5A0;
+  --accent-muted-rose: #B87873;
+  --text-dark: #F7EEE9;
+  --text-muted: #B5A49D;
+  --border-color: #4A3D38;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-paper);
+  color: var(--text-dark);
+  font-family: var(--font-dm-sans);
+  overflow-x: hidden;
+  transition: background-color 0.35s ease, color 0.35s ease;
+  background-image:
+    radial-gradient(rgba(89, 65, 59, 0.038) 1px, transparent 0),
+    radial-gradient(rgba(184, 120, 115, 0.025) 1px, transparent 0);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
+}
+
+.dark body {
+  background-image:
+    radial-gradient(rgba(247, 238, 233, 0.028) 1px, transparent 0),
+    radial-gradient(rgba(216, 165, 160, 0.018) 1px, transparent 0);
+}
+
+/* Tactile Scrapbook Paper Card */
+.paper-card {
+  background-color: var(--surface-cream);
+  border: 1px solid var(--border-color);
+  box-shadow:
+    0 8px 28px -4px rgba(89, 65, 59, 0.075),
+    0 2px 6px -1px rgba(89, 65, 59, 0.04),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+}
+
+.dark .paper-card {
+  box-shadow:
+    0 10px 30px -4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Subtle Notebook Ruled Paper Texture */
+.notebook-paper {
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(216, 165, 160, 0.18) 31px,
+    rgba(216, 165, 160, 0.18) 32px
+  );
+}
+
+/* Washi Tape Effect */
+.washi-tape {
+  position: absolute;
+  height: 24px;
+  background: rgba(216, 165, 160, 0.45);
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 3px rgba(89, 65, 59, 0.1);
+  transform-origin: center;
+  z-index: 10;
+  border-left: 2px dashed rgba(255, 255, 255, 0.4);
+  border-right: 2px dashed rgba(255, 255, 255, 0.4);
+}
+
+.washi-tape-cream {
+  background: rgba(243, 225, 220, 0.65);
+}
+
+/* Polaroid Photo Card */
+.polaroid-frame {
+  background: #FFFDFC;
+  padding: 13px 13px 38px 13px;
+  box-shadow:
+    0 16px 38px -6px rgba(89, 65, 59, 0.18),
+    0 6px 14px -3px rgba(89, 65, 59, 0.09),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(232, 215, 204, 0.85);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dark .polaroid-frame {
+  background: #332925;
+  border-color: rgba(74, 61, 56, 0.9);
+  box-shadow:
+    0 18px 40px -6px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.polaroid-frame:hover {
+  transform: translateY(-5px) rotate(0deg);
+  box-shadow:
+    0 22px 46px -6px rgba(89, 65, 59, 0.24),
+    0 8px 18px -3px rgba(89, 65, 59, 0.12);
+}
+
+/* Animated Link Underline */
+.link-editorial {
+  position: relative;
+}
+.link-editorial::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.link-editorial:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Keyframe Animations */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 6s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Drop Cap Styling for Literary Blog Reading */
+.prose-literary > p:first-of-type::first-letter {
+  font-family: var(--font-playfair);
+  float: left;
+  font-size: 4rem;
+  line-height: 0.8;
+  padding-top: 4px;
+  padding-right: 14px;
+  padding-bottom: 4px;
+  color: #59413B;
+  font-weight: 700;
+}
+
+.dark .prose-literary > p:first-of-type::first-letter {
+  color: #D8A5A0;
+}
+
+/* Reading Progress Bar */
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3.5px;
+  background: linear-gradient(90deg, #D8A5A0, #B87873, #59413B);
+  z-index: 100;
+  transition: width 0.12s ease-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-rose);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-muted-rose);
+}
+
+/* TipTap Editor Styles */
+.tiptap {
+  outline: none;
+  min-height: 380px;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--text-muted);
+  pointer-events: none;
+  height: 0;
+}
+
+.tiptap h1 {
+  font-family: var(--font-playfair);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tiptap h2 {
+  font-family: var(--font-playfair);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap h3 {
+  font-family: var(--font-playfair);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid #D8A5A0;
+  padding-left: 1rem;
+  font-style: italic;
+  margin: 1rem 0;
+  color: var(--text-muted);
+}

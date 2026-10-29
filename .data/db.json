@@ -1,0 +1,619 @@
+{
+  "articles": [
+    {
+      "id": "art-001",
+      "title": "A Battle Within",
+      "subtitle": "Understanding the silent struggles, the unspoken emotions and the journey towards peace with oneself.",
+      "slug": "a-battle-within",
+      "excerpt": "Sometimes the loudest battles are the ones we fight within ourselves... The battle to understand ourselves, to let go, to forgive, to accept and to move forward.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Sometimes the toughest battles are not the ones we fight outside, but the ones within. The battle to understand ourselves, to let go, to forgive, to accept and to move forward."
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "As we grow, we lose parts of ourselves, carry regrets, hold grudges and often forget to be grateful for what we have. This is a reflection on those inner battles and the lessons they teach us."
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "1. Lost Element"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "There are times when we feel like we’ve lost a part of ourselves. The person we used to feel is unfamiliar, and the things that once brought joy no longer feel the same. We search for that lost spark in familiar places, only to realize that growth often requires shedding versions of ourselves that no longer serve who we are becoming."
+              }
+            ]
+          },
+          {
+            "type": "blockquote",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Healing begins the moment we choose to be kind to ourselves."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 2
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "2. Regrets"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Regret is a heavy anchor that keeps us tethered to a past we can no longer alter. Every misstep carried a lesson, and every closed door pointed us toward an unexpected path."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/a-battle-within.webp",
+      "status": "published",
+      "published_at": "2023-11-28T09:00:00Z",
+      "reading_time_minutes": 5,
+      "views_count": 142,
+      "created_at": "2023-11-28T08:00:00Z",
+      "updated_at": "2023-11-28T09:00:00Z"
+    },
+    {
+      "id": "art-002",
+      "title": "Transformation Phase",
+      "subtitle": "Navigating the in-between seasons of life when who we were no longer fits.",
+      "slug": "transformation-phase",
+      "excerpt": "Change is inevitable, and so is the growth that comes with it. When we stand in the doorway of transformation, discomfort is not failure—it is proof of expansion.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Change is inevitable, and so is the growth that comes with it. Standing between who we were and who we are becoming often feels unsettling, but it is precisely in this space of uncertainty where profound transformation takes root."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/transformation-phase.webp",
+      "status": "published",
+      "published_at": "2023-11-21T09:00:00Z",
+      "reading_time_minutes": 4,
+      "views_count": 88,
+      "created_at": "2023-11-21T08:00:00Z",
+      "updated_at": "2023-11-21T09:00:00Z"
+    },
+    {
+      "id": "art-003",
+      "title": "Be Responsible",
+      "subtitle": "Taking ownership of our reactions, our boundaries, and our peace.",
+      "slug": "be-responsible",
+      "excerpt": "Happiness is not something we stumble upon; it is something we cultivate through daily responsibility and gentle intentionality.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Happiness is not something we find; it is something we create. When we stop waiting for external circumstances to align, we reclaim the power to shape our inner peace."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/responsibility.webp",
+      "status": "published",
+      "published_at": "2023-11-14T09:00:00Z",
+      "reading_time_minutes": 3,
+      "views_count": 67,
+      "created_at": "2023-11-14T08:00:00Z",
+      "updated_at": "2023-11-14T09:00:00Z"
+    },
+    {
+      "id": "art-004",
+      "title": "Hard Work",
+      "subtitle": "The quiet persistence that unfolds when nobody is watching.",
+      "slug": "hard-work",
+      "excerpt": "Sometimes the things we feel like giving up on are the ones that shape us. True dedication rarely announces itself with noise—it speaks through quiet consistency.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Sometimes the things we feel like giving up on are the ones that shape us most deeply. When inspiration fades, commitment is what keeps the flame alive."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/perseverance.webp",
+      "status": "published",
+      "published_at": "2023-11-07T09:00:00Z",
+      "reading_time_minutes": 3,
+      "views_count": 53,
+      "created_at": "2023-11-07T08:00:00Z",
+      "updated_at": "2023-11-07T09:00:00Z"
+    },
+    {
+      "id": "art-005",
+      "title": "Celebrate Yourself",
+      "subtitle": "Honoring the small milestones and quiet victories that often go unnoticed.",
+      "slug": "celebrate-yourself",
+      "excerpt": "Happiness is not something to be postponed for the future; it is something you design for the present. Take a moment to honor how much courage it took to reach today.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Happiness is not something to be postponed for the future; it is something you design for the present. Honor the silent steps you took when no one was clapping."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/celebrate-yourself.webp",
+      "status": "published",
+      "published_at": "2023-10-31T09:00:00Z",
+      "reading_time_minutes": 4,
+      "views_count": 95,
+      "created_at": "2023-10-31T08:00:00Z",
+      "updated_at": "2023-10-31T09:00:00Z"
+    },
+    {
+      "id": "art-006",
+      "title": "Lost Element",
+      "subtitle": "Finding our way back to what genuinely matters.",
+      "slug": "lost-element",
+      "excerpt": "Sometimes the greatest mistake is to forget what we have while we obsess over what we do not. Reconnecting with simplicity brings our spirit home.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "There are times when we feel like we’ve lost a part of ourselves. The person we used to be feels unfamiliar, and the things that once brought joy no longer feel the same. Yet this emptiness is often an invitation to rediscover who we truly are."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/self-reflection.webp",
+      "status": "published",
+      "published_at": "2023-10-23T09:00:00Z",
+      "reading_time_minutes": 4,
+      "views_count": 74,
+      "created_at": "2023-10-23T08:00:00Z",
+      "updated_at": "2023-10-23T09:00:00Z"
+    },
+    {
+      "id": "art-draft-001",
+      "title": "Embracing the Slow Days",
+      "subtitle": "Learning to celebrate quiet pauses without guilt or haste.",
+      "slug": "embracing-the-slow-days",
+      "excerpt": "In a world that measures worth by velocity, slowing down is an act of quiet courage. Today, let the unfinished tasks rest and breathe in the morning air.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "We often treat rest as something that must be earned, a reward deferred until all deadlines are vanquished. But the soul does not operate on quarterly goals. There is profound medicine in a slow morning, a warm cup of tea, and the permission to simply be."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/gratitude.webp",
+      "status": "draft",
+      "published_at": null,
+      "reading_time_minutes": 3,
+      "views_count": 0,
+      "created_at": "2023-12-01T10:00:00Z",
+      "updated_at": "2023-12-01T10:30:00Z"
+    },
+    {
+      "id": "art-draft-002",
+      "title": "The Courage to Begin Again",
+      "subtitle": "Why starting over is never wasted time.",
+      "slug": "the-courage-to-begin-again",
+      "excerpt": "Every fresh beginning asks us to leave the shoreline of what is known. When we let go of what was, we make room for what could be.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Standing at the threshold of a fresh chapter is always intimidating. Yet beginning again is not an erasure of the past; it is the culmination of all the wisdom gathered along the way."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/hope.webp",
+      "status": "draft",
+      "published_at": null,
+      "reading_time_minutes": 4,
+      "views_count": 0,
+      "created_at": "2023-12-04T14:15:00Z",
+      "updated_at": "2023-12-04T15:00:00Z"
+    },
+    {
+      "id": "art-draft-003",
+      "title": "Whispers of Autumn",
+      "subtitle": "Lessons from falling leaves on the art of graceful surrender.",
+      "slug": "whispers-of-autumn",
+      "excerpt": "Autumn does not mourn what it must release; it dresses in gold and surrenders gracefully to the change of season.",
+      "content": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Trees do not cling desperately to their fading leaves. They let them fall, knowing that barren branches are the prerequisite for spring blossoms."
+              }
+            ]
+          }
+        ]
+      },
+      "cover_image_path": "/images/writings/letting-go.webp",
+      "status": "draft",
+      "published_at": null,
+      "reading_time_minutes": 3,
+      "views_count": 0,
+      "created_at": "2023-12-08T09:20:00Z",
+      "updated_at": "2023-12-08T11:45:00Z"
+    }
+  ],
+  "settings": {
+    "site_name": "Books&Wisdom",
+    "tagline": "thoughts for a kinder, brighter you ♡",
+    "author_name": "Anjali",
+    "author_intro": "This is my little corner on the internet where I share my thoughts, experiences and lessons from life. Through my writings, I hope to reflect, grow and maybe connect with someone who feels the same.",
+    "author_story": "Books&Wisdom was born from a journal, a quiet room, and a desire to make sense of the tender, messy, and beautiful experience of being human. Here, I write about finding peace within ourselves, navigating transitions, embracing our vulnerabilities, and learning to be gentle along the way.",
+    "author_image_url": "/images/homepage/author-introduction.webp",
+    "author_note": "Just a girl who loves reading, writing and finding beauty in little things ♡",
+    "hero_headline": "Books&Wisdom",
+    "hero_subheading": "A space for real thoughts, personal journeys and meaningful reflections on life, growth and everything in between.",
+    "hero_note": "Good thoughts, brighter days ♡",
+    "homepage_quote": "A little perspective can turn a difficult day into a meaningful one.",
+    "social_instagram": "https://instagram.com",
+    "social_linkedin": "https://linkedin.com",
+    "social_email": "hello@booksandwisdom.com",
+    "social_twitter": "https://x.com",
+    "footer_text": "A space for real thoughts, personal journeys and meaningful reflections on life, growth and everything in between.",
+    "footer_signoff": "Good thoughts, Brighter Days ♡",
+    "seo_default_title": "Books&Wisdom — Personal Scrapbook & Writings",
+    "seo_default_description": "A space for real thoughts, personal journeys and meaningful reflections on life, growth and everything in between.",
+    "hero_image_url": "/images/homepage/homepage-hero.webp",
+    "updated_at": "2026-10-22T16:07:32.436Z",
+    "logo_image_url": "/images/logo_3d_emblem.jpg",
+    "quote_image_url": "/images/homepage/reflection-background.webp",
+    "not_found_image_url": "/images/errors/404-lost-page.webp"
+  },
+  "media": [
+    {
+      "id": "med-home-1",
+      "file_path": "homepage/homepage-hero.webp",
+      "url": "/images/homepage/homepage-hero.webp",
+      "filename": "homepage-hero.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 167448,
+      "alt_text": "Cozy writing desk beside a window at golden hour with an open journal, books, dried flowers, and warm tea",
+      "created_at": "2026-10-29T07:32:19.200Z"
+    },
+    {
+      "id": "med-home-2",
+      "file_path": "homepage/featured-writing.webp",
+      "url": "/images/homepage/featured-writing.webp",
+      "filename": "featured-writing.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 158194,
+      "alt_text": "Open notebook, chamomile tea, and dried lavender in soft morning window light",
+      "created_at": "2026-10-29T07:32:19.200Z"
+    },
+    {
+      "id": "med-home-3",
+      "file_path": "homepage/reflection-background.webp",
+      "url": "/images/homepage/reflection-background.webp",
+      "filename": "reflection-background.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 97536,
+      "alt_text": "Distant rolling hills in warm golden-hour evening light with wildflower silhouettes",
+      "created_at": "2026-10-29T07:32:19.200Z"
+    },
+    {
+      "id": "med-home-4",
+      "file_path": "homepage/author-introduction.webp",
+      "url": "/images/homepage/author-introduction.webp",
+      "filename": "author-introduction.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 41534,
+      "alt_text": "Quiet wooden writing desk with an open journal, fountain pen, and natural window light",
+      "created_at": "2026-10-29T07:32:19.200Z"
+    },
+    {
+      "id": "med-writing-1",
+      "file_path": "writings/self-reflection.webp",
+      "url": "/images/writings/self-reflection.webp",
+      "filename": "self-reflection.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 95144,
+      "alt_text": "Person sitting quietly near a wooden window at dusk looking at their reflection in warm evening light",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-2",
+      "file_path": "writings/regret-and-choices.webp",
+      "url": "/images/writings/regret-and-choices.webp",
+      "filename": "regret-and-choices.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 105062,
+      "alt_text": "Open blank journal beside a vintage sepia photograph and brass fountain pen with golden-hour shadows",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-3",
+      "file_path": "writings/personal-growth.webp",
+      "url": "/images/writings/personal-growth.webp",
+      "filename": "personal-growth.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 53386,
+      "alt_text": "Small green plant growing toward warm sunlight beside an open book and notebook",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-4",
+      "file_path": "writings/gratitude.webp",
+      "url": "/images/writings/gratitude.webp",
+      "filename": "gratitude.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 65662,
+      "alt_text": "Morning sunlight falling across a simple breakfast, a journal, and a small vase of flowers",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-5",
+      "file_path": "writings/hope.webp",
+      "url": "/images/writings/hope.webp",
+      "filename": "hope.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 306158,
+      "alt_text": "Quiet natural pathway after rain with soft golden sunlight breaking through clouds",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-6",
+      "file_path": "writings/emotional-distance.webp",
+      "url": "/images/writings/emotional-distance.webp",
+      "filename": "emotional-distance.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 59032,
+      "alt_text": "Two empty wooden chairs near a window with late-afternoon sunlight falling between them",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-7",
+      "file_path": "writings/responsibility.webp",
+      "url": "/images/writings/responsibility.webp",
+      "filename": "responsibility.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 94124,
+      "alt_text": "Open cream-paper notebook with a brass fountain pen and warm morning sunlight on a wooden desk",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-8",
+      "file_path": "writings/perseverance.webp",
+      "url": "/images/writings/perseverance.webp",
+      "filename": "perseverance.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 62232,
+      "alt_text": "Quiet study desk late in the evening illuminated by a warm brass lamp with stacked books and open notebook",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-9",
+      "file_path": "writings/social-perspectives.webp",
+      "url": "/images/writings/social-perspectives.webp",
+      "filename": "social-perspectives.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 91880,
+      "alt_text": "Person looking out at a softly blurred city skyline from a quiet window at dusk",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-10",
+      "file_path": "writings/feeling-unloved.webp",
+      "url": "/images/writings/feeling-unloved.webp",
+      "filename": "feeling-unloved.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 262374,
+      "alt_text": "Quiet bedroom corner with an empty chair, soft window light, a closed journal, and muted flowers",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-11",
+      "file_path": "writings/celebrate-yourself.webp",
+      "url": "/images/writings/celebrate-yourself.webp",
+      "filename": "celebrate-yourself.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 117602,
+      "alt_text": "Small bouquet of dusty-rose flowers, open handwritten journal, sunlight, and porcelain teacup",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-12",
+      "file_path": "writings/life-happened.webp",
+      "url": "/images/writings/life-happened.webp",
+      "filename": "life-happened.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 118672,
+      "alt_text": "Train window overlooking a changing golden countryside landscape with warm light reflections",
+      "created_at": "2026-10-29T07:32:19.201Z"
+    },
+    {
+      "id": "med-writing-13",
+      "file_path": "writings/inner-conflict.webp",
+      "url": "/images/writings/inner-conflict.webp",
+      "filename": "inner-conflict.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 79642,
+      "alt_text": "Person standing between warm light and soft shadow near a window photographed from behind",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-14",
+      "file_path": "writings/letting-go.webp",
+      "url": "/images/writings/letting-go.webp",
+      "filename": "letting-go.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 177984,
+      "alt_text": "Dried autumn leaf resting on calm water with muted evening reflections",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-15",
+      "file_path": "writings/relationships.webp",
+      "url": "/images/writings/relationships.webp",
+      "filename": "relationships.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 54122,
+      "alt_text": "Two cups of tea on a wooden table near a window with a shared book and soft afternoon light",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-16",
+      "file_path": "writings/a-battle-within.webp",
+      "url": "/images/writings/a-battle-within.webp",
+      "filename": "a-battle-within.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 86008,
+      "alt_text": "Lone figure sitting quietly near a large wooden window at dusk surrounded by soft shadows and fading light",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-17",
+      "file_path": "writings/transformation-phase.webp",
+      "url": "/images/writings/transformation-phase.webp",
+      "filename": "transformation-phase.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 47956,
+      "alt_text": "Tree branch with fresh new sage-green leaves and blush bud illuminated by early-morning sunlight",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-18",
+      "file_path": "writings/wisdom-and-learning.webp",
+      "url": "/images/writings/wisdom-and-learning.webp",
+      "filename": "wisdom-and-learning.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 149242,
+      "alt_text": "Open vintage book with pencil annotations, a wooden pencil, and warm sunlight crossing the pages",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-19",
+      "file_path": "writings/kind-perspective.webp",
+      "url": "/images/writings/kind-perspective.webp",
+      "filename": "kind-perspective.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 80818,
+      "alt_text": "Warm sunlight falling across a quiet garden scene with delicate flowers and softly blurred greenery",
+      "created_at": "2026-10-29T07:32:19.202Z"
+    },
+    {
+      "id": "med-writing-20",
+      "file_path": "writings/choices-and-uncertainty.webp",
+      "url": "/images/writings/choices-and-uncertainty.webp",
+      "filename": "choices-and-uncertainty.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 245190,
+      "alt_text": "Quiet woodland pathway splitting into two directions in warm muted film tones",
+      "created_at": "2026-10-29T07:32:19.203Z"
+    },
+    {
+      "id": "med-about-1",
+      "file_path": "about/about-hero.webp",
+      "url": "/images/about/about-hero.webp",
+      "filename": "about-hero.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 108564,
+      "alt_text": "Open journal, stacked books, dried flowers, and warm sunlight near a window",
+      "created_at": "2026-10-29T07:32:19.203Z"
+    },
+    {
+      "id": "med-about-2",
+      "file_path": "about/writing-process.webp",
+      "url": "/images/about/writing-process.webp",
+      "filename": "writing-process.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 87426,
+      "alt_text": "Close-up of a hand writing with a fountain pen in a cream journal beside a cup of tea and lavender",
+      "created_at": "2026-10-29T07:32:19.204Z"
+    },
+    {
+      "id": "med-about-3",
+      "file_path": "about/personal-inspiration.webp",
+      "url": "/images/about/personal-inspiration.webp",
+      "filename": "personal-inspiration.webp",
+      "mime_type": "image/webp",
+      "size_bytes": 202626,
+      "alt_text": "Nostalgic arrangement of vintage books, dried flowers, and a personal journal in warm light",
+      "created_at": "2026-10-29T07:32:19.204Z"
+    }
+  ]
+}

@@ -1,0 +1,194 @@
+import fs from 'fs';
+import path from 'path';
+
+const PUBLIC_IMAGES = path.join(process.cwd(), 'public', 'images');
+
+const manifest = {
+  project: 'Books&Wisdom',
+  aesthetic: 'Personal Scrapbook × Cinematic Literary Journal',
+  generated_at: new Date().toISOString(),
+  categories: {
+    homepage: [
+      {
+        id: 'H01',
+        filename: 'homepage-hero.webp',
+        path: '/images/homepage/homepage-hero.webp',
+        dimensions: '1800x1200',
+        aspectRatio: '3:2',
+        format: 'image/webp',
+        purpose: 'Main scrapbook-style photograph on the homepage hero polaroid.',
+        alt: 'Cozy writing desk beside a window at golden hour with an open journal, books, dried flowers, and warm tea',
+      },
+      {
+        id: 'H02',
+        filename: 'featured-writing.webp',
+        path: '/images/homepage/featured-writing.webp',
+        dimensions: '1200x800',
+        aspectRatio: '3:2',
+        format: 'image/webp',
+        purpose: 'Visual companion to featured essay cards.',
+        alt: 'Open notebook, chamomile tea, and dried lavender in soft morning window light',
+      },
+      {
+        id: 'H03',
+        filename: 'reflection-background.webp',
+        path: '/images/homepage/reflection-background.webp',
+        dimensions: '1800x1200',
+        aspectRatio: '3:2',
+        format: 'image/webp',
+        purpose: 'Atmospheric landscape backdrop for the homepage quotation and reflection section.',
+        alt: 'Distant rolling hills in warm golden-hour evening light with wildflower silhouettes',
+      },
+      {
+        id: 'H04',
+        filename: 'author-introduction.webp',
+        path: '/images/homepage/author-introduction.webp',
+        dimensions: '1200x800',
+        aspectRatio: '3:2',
+        format: 'image/webp',
+        purpose: 'Intimate photograph of a writing desk, open book, and journal for the homepage author introduction.',
+        alt: 'Quiet wooden writing desk with an open journal, fountain pen, and natural window light',
+      },
+    ],
+    writings: [
+      { id: 'W01', filename: 'self-reflection.webp', path: '/images/writings/self-reflection.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Self-reflection & Lost Element', alt: 'Person sitting quietly near a wooden window at dusk looking at their reflection in warm evening light' },
+      { id: 'W02', filename: 'regret-and-choices.webp', path: '/images/writings/regret-and-choices.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Regret and missed opportunities', alt: 'Open blank journal beside a vintage sepia photograph and brass fountain pen with golden-hour shadows' },
+      { id: 'W03', filename: 'personal-growth.webp', path: '/images/writings/personal-growth.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Personal growth', alt: 'Small green plant growing toward warm sunlight beside an open book and notebook' },
+      { id: 'W04', filename: 'gratitude.webp', path: '/images/writings/gratitude.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Gratitude & Slow Days', alt: 'Morning sunlight falling across a simple breakfast, a journal, and a small vase of flowers' },
+      { id: 'W05', filename: 'hope.webp', path: '/images/writings/hope.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Hope & Courage to Begin Again', alt: 'Quiet natural pathway after rain with soft golden sunlight breaking through clouds' },
+      { id: 'W06', filename: 'emotional-distance.webp', path: '/images/writings/emotional-distance.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Emotional distance', alt: 'Two empty wooden chairs near a window with late-afternoon sunlight falling between them' },
+      { id: 'W07', filename: 'responsibility.webp', path: '/images/writings/responsibility.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Responsibility', alt: 'Open cream-paper notebook with a brass fountain pen and warm morning sunlight on a wooden desk' },
+      { id: 'W08', filename: 'perseverance.webp', path: '/images/writings/perseverance.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Hard work and perseverance', alt: 'Quiet study desk late in the evening illuminated by a warm brass lamp with stacked books and open notebook' },
+      { id: 'W09', filename: 'social-perspectives.webp', path: '/images/writings/social-perspectives.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Society and changing perspectives', alt: 'Person looking out at a softly blurred city skyline from a quiet window at dusk' },
+      { id: 'W10', filename: 'feeling-unloved.webp', path: '/images/writings/feeling-unloved.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Feeling unloved', alt: 'Quiet bedroom corner with an empty chair, soft window light, a closed journal, and muted flowers' },
+      { id: 'W11', filename: 'celebrate-yourself.webp', path: '/images/writings/celebrate-yourself.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Celebrating yourself', alt: 'Small bouquet of dusty-rose flowers, open handwritten journal, sunlight, and porcelain teacup' },
+      { id: 'W12', filename: 'life-happened.webp', path: '/images/writings/life-happened.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Life’s unexpected changes', alt: 'Train window overlooking a changing golden countryside landscape with warm light reflections' },
+      { id: 'W13', filename: 'inner-conflict.webp', path: '/images/writings/inner-conflict.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Dual nature and inner conflict', alt: 'Person standing between warm light and soft shadow near a window photographed from behind' },
+      { id: 'W14', filename: 'letting-go.webp', path: '/images/writings/letting-go.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Grudges and letting go', alt: 'Dried autumn leaf resting on calm water with muted evening reflections' },
+      { id: 'W15', filename: 'relationships.webp', path: '/images/writings/relationships.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Relationships and understanding', alt: 'Two cups of tea on a wooden table near a window with a shared book and soft afternoon light' },
+      { id: 'W16', filename: 'a-battle-within.webp', path: '/images/writings/a-battle-within.webp', dimensions: '1200x800', format: 'image/webp', theme: 'A battle within', alt: 'Lone figure sitting quietly near a large wooden window at dusk surrounded by soft shadows and fading light' },
+      { id: 'W17', filename: 'transformation-phase.webp', path: '/images/writings/transformation-phase.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Transformation phase', alt: 'Tree branch with fresh new sage-green leaves and blush bud illuminated by early-morning sunlight' },
+      { id: 'W18', filename: 'wisdom-and-learning.webp', path: '/images/writings/wisdom-and-learning.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Wisdom and learning', alt: 'Open vintage book with pencil annotations, a wooden pencil, and warm sunlight crossing the pages' },
+      { id: 'W19', filename: 'kind-perspective.webp', path: '/images/writings/kind-perspective.webp', dimensions: '1200x800', format: 'image/webp', theme: 'A kinder perspective', alt: 'Warm sunlight falling across a quiet garden scene with delicate flowers and softly blurred greenery' },
+      { id: 'W20', filename: 'choices-and-uncertainty.webp', path: '/images/writings/choices-and-uncertainty.webp', dimensions: '1200x800', format: 'image/webp', theme: 'Uncertainty and decisions', alt: 'Quiet woodland pathway splitting into two directions in warm muted film tones' },
+    ],
+    about: [
+      { id: 'A01', filename: 'about-hero.webp', path: '/images/about/about-hero.webp', dimensions: '1800x1200', format: 'image/webp', purpose: 'About page hero polaroid scene of a journal, books, flowers, and sunlight near a window.', alt: 'Open journal, stacked books, dried flowers, and warm sunlight near a window' },
+      { id: 'A02', filename: 'writing-process.webp', path: '/images/about/writing-process.webp', dimensions: '1200x800', format: 'image/webp', purpose: 'Close-up photograph of a hand writing in an open journal with a fountain pen and cup of tea.', alt: 'Close-up of a hand writing with a fountain pen in a cream journal beside a cup of tea and lavender' },
+      { id: 'A03', filename: 'personal-inspiration.webp', path: '/images/about/personal-inspiration.webp', dimensions: '1200x800', format: 'image/webp', purpose: 'Nostalgic arrangement of books, dried flowers, photographs, and a journal.', alt: 'Nostalgic arrangement of vintage books, dried flowers, and a personal journal in warm light' },
+    ],
+    decorative: [
+      { filename: 'tape-beige.png', path: '/images/decorative/tape-beige.png', dimensions: '512x180', format: 'image/png', transparent: true, purpose: 'Translucent beige paper-tape strip' },
+      { filename: 'tape-blush.png', path: '/images/decorative/tape-blush.png', dimensions: '512x180', format: 'image/png', transparent: true, purpose: 'Dusty-pink paper-tape strip' },
+      { filename: 'pressed-flowers.png', path: '/images/decorative/pressed-flowers.png', dimensions: '600x600', format: 'image/png', transparent: true, purpose: 'Delicate dried flowers and stems' },
+      { filename: 'botanical-corner.png', path: '/images/decorative/botanical-corner.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Small botanical illustration for page corners' },
+      { filename: 'pressed-leaves.png', path: '/images/decorative/pressed-leaves.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Subtle arrangement of muted green and brown leaves' },
+      { filename: 'small-butterfly.png', path: '/images/decorative/small-butterfly.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Restrained vintage botanical butterfly illustration' },
+      { filename: 'hand-drawn-heart.png', path: '/images/decorative/hand-drawn-heart.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Simple imperfect brown hand-drawn heart' },
+      { filename: 'hand-drawn-sparkles.png', path: '/images/decorative/hand-drawn-sparkles.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Delicate hand-drawn sparkles' },
+      { filename: 'paper-note.png', path: '/images/decorative/paper-note.png', dimensions: '600x500', format: 'image/png', transparent: true, purpose: 'Irregular cream paper-note shape' },
+      { filename: 'torn-paper-strip.png', path: '/images/decorative/torn-paper-strip.png', dimensions: '800x220', format: 'image/png', transparent: true, purpose: 'Horizontal cream paper strip with naturally torn edges' },
+      { filename: 'paper-corner.png', path: '/images/decorative/paper-corner.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Small torn-paper corner' },
+      { filename: 'pressed-petal.png', path: '/images/decorative/pressed-petal.png', dimensions: '512x512', format: 'image/png', transparent: true, purpose: 'Individual muted blush petals' },
+    ],
+    textures: [
+      { filename: 'paper-grain.webp', path: '/images/textures/paper-grain.webp', dimensions: '1200x1200', format: 'image/webp', seamless: true, purpose: 'Warm ivory paper with subtle organic fibers' },
+      { filename: 'cream-paper.webp', path: '/images/textures/cream-paper.webp', dimensions: '1200x1200', format: 'image/webp', seamless: true, purpose: 'Soft nearly uniform cream paper' },
+      { filename: 'blush-paper.webp', path: '/images/textures/blush-paper.webp', dimensions: '1200x1200', format: 'image/webp', seamless: true, purpose: 'Subtle dusty-pink paper texture' },
+      { filename: 'dark-paper.webp', path: '/images/textures/dark-paper.webp', dimensions: '1200x1200', format: 'image/webp', seamless: true, purpose: 'Subtle warm-charcoal paper texture for dark mode' },
+      { filename: 'soft-watercolor.webp', path: '/images/textures/soft-watercolor.webp', dimensions: '1200x1200', format: 'image/webp', seamless: true, purpose: 'Restrained watercolor wash in cream, blush, and muted beige' },
+    ],
+    admin: [
+      { filename: 'admin-empty-writings.webp', path: '/images/admin/admin-empty-writings.webp', dimensions: '800x600', format: 'image/webp', purpose: 'Peaceful illustration of an open notebook and pen for an empty article list' },
+      { filename: 'admin-empty-media.webp', path: '/images/admin/admin-empty-media.webp', dimensions: '800x600', format: 'image/webp', purpose: 'Illustration of a polaroid photograph, flower, and notebook for an empty media library' },
+      { filename: 'admin-welcome.webp', path: '/images/admin/admin-welcome.webp', dimensions: '1600x500', format: 'image/webp', purpose: 'Subtle wide image of a warm writing desk for the admin dashboard welcome banner' },
+    ],
+    search: [
+      { id: 'S01', filename: 'search-empty.webp', path: '/images/search/search-empty.webp', dimensions: '800x600', format: 'image/webp', purpose: 'Small magnifying glass beside an open book and dried flowers for empty search states' },
+    ],
+    errors: [
+      { id: 'S02', filename: '404-lost-page.webp', path: '/images/errors/404-lost-page.webp', dimensions: '1200x800', format: 'image/webp', purpose: 'Open vintage book with a loose page, pressed dusty-rose flowers, and antique brass compass for the 404 page' },
+    ],
+  },
+};
+
+fs.writeFileSync(path.join(PUBLIC_IMAGES, 'asset-manifest.json'), JSON.stringify(manifest, null, 2));
+console.log('Saved public/images/asset-manifest.json');
+
+// Update .data/db.json with the new cohesive asset paths while preserving all article text and titles
+const dbPath = path.join(process.cwd(), '.data', 'db.json');
+const db = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+
+const slugToCover = {
+  'a-battle-within': '/images/writings/a-battle-within.webp',
+  'transformation-phase': '/images/writings/transformation-phase.webp',
+  'be-responsible': '/images/writings/responsibility.webp',
+  'hard-work': '/images/writings/perseverance.webp',
+  'celebrate-yourself': '/images/writings/celebrate-yourself.webp',
+  'lost-element': '/images/writings/self-reflection.webp',
+  'embracing-the-slow-days': '/images/writings/gratitude.webp',
+  'the-courage-to-begin-again': '/images/writings/hope.webp',
+  'whispers-of-autumn': '/images/writings/letting-go.webp',
+};
+
+for (const art of db.articles) {
+  if (slugToCover[art.slug]) {
+    art.cover_image_path = slugToCover[art.slug];
+  }
+}
+
+db.settings.hero_image_url = '/images/homepage/homepage-hero.webp';
+db.settings.author_image_url = '/images/homepage/author-introduction.webp';
+db.settings.quote_image_url = '/images/homepage/reflection-background.webp';
+db.settings.not_found_image_url = '/images/errors/404-lost-page.webp';
+db.settings.logo_image_url = '/images/logo_3d_emblem.jpg';
+
+// Populate db.media with the complete cohesive image library
+const newMediaItems = [
+  ...manifest.categories.homepage.map((item, idx) => {
+    const fullFile = path.join(process.cwd(), 'public', item.path);
+    const size = fs.existsSync(fullFile) ? fs.statSync(fullFile).size : 95000;
+    return {
+      id: `med-home-${idx + 1}`,
+      file_path: item.path.replace('/images/', ''),
+      url: item.path,
+      filename: item.filename,
+      mime_type: 'image/webp',
+      size_bytes: size,
+      alt_text: item.alt,
+      created_at: new Date().toISOString(),
+    };
+  }),
+  ...manifest.categories.writings.map((item, idx) => {
+    const fullFile = path.join(process.cwd(), 'public', item.path);
+    const size = fs.existsSync(fullFile) ? fs.statSync(fullFile).size : 85000;
+    return {
+      id: `med-writing-${idx + 1}`,
+      file_path: item.path.replace('/images/', ''),
+      url: item.path,
+      filename: item.filename,
+      mime_type: 'image/webp',
+      size_bytes: size,
+      alt_text: item.alt,
+      created_at: new Date().toISOString(),
+    };
+  }),
+  ...manifest.categories.about.map((item, idx) => {
+    const fullFile = path.join(process.cwd(), 'public', item.path);
+    const size = fs.existsSync(fullFile) ? fs.statSync(fullFile).size : 88000;
+    return {
+      id: `med-about-${idx + 1}`,
+      file_path: item.path.replace('/images/', ''),
+      url: item.path,
+      filename: item.filename,
+      mime_type: 'image/webp',
+      size_bytes: size,
+      alt_text: item.alt,
+      created_at: new Date().toISOString(),
+    };
+  }),
+];
+
+db.media = newMediaItems;
+fs.writeFileSync(dbPath, JSON.stringify(db, null, 2));
+console.log('Updated .data/db.json with', db.articles.length, 'articles and', db.media.length, 'cohesive media assets.');
