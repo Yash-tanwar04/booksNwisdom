@@ -3,7 +3,7 @@
 
 -- 1. Create articles table
 CREATE TABLE IF NOT EXISTS public.articles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     title TEXT NOT NULL,
     subtitle TEXT,
     slug TEXT UNIQUE NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.articles (
     views_count INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    author_id UUID
+    author_id TEXT
 );
 
 -- Drop strict foreign key on author_id if it existed from an older schema
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_articles_created_at ON public.articles (created_a
 
 -- 2. Create site_settings table
 CREATE TABLE IF NOT EXISTS public.site_settings (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     site_name TEXT NOT NULL DEFAULT 'Books&Wisdom',
     tagline TEXT DEFAULT 'thoughts for a kinder, brighter you ♡',
     author_name TEXT DEFAULT 'Anjali',
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
 
 -- 3. Create media_files table
 CREATE TABLE IF NOT EXISTS public.media_files (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
     file_path TEXT NOT NULL,
     url TEXT NOT NULL,
     filename TEXT NOT NULL,

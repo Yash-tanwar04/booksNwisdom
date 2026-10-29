@@ -16,6 +16,10 @@ import {
   Database,
   RefreshCw,
   FileText,
+  Copy,
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle2,
 } from 'lucide-react';
 import { SiteSettings } from '@/types';
 import { WashiTape } from '../decorations/WashiTape';
@@ -29,7 +33,13 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
   const [form, setForm] = useState<SiteSettings>(initialSettings);
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'homepage' | 'social' | 'seo' | 'migration'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'homepage' | 'social' | 'seo' | 'migration' | 'database'>('general');
+
+  // Supabase Database State
+  const [dbStatus, setDbStatus] = useState<any>(null);
+  const [dbLoading, setDbLoading] = useState(false);
+  const [sqlContent, setSqlContent] = useState<string>('');
+  const [sqlCopied, setSqlCopied] = useState(false);
 
   // WordPress Migration State
   const [wpJsonInput, setWpJsonInput] = useState('');
@@ -189,6 +199,29 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
     }
   };
 
+  const loadDbInfo = async () => {
+    setDbLoading(true);
+    try {
+      const [dbRes, sqlRes] = await Promise.all([
+        fetch('/api/debug-db', { cache: 'no-store' }).then((r) => r.json()),
+        fetch('/api/supabase-schema').then((r) => r.json()),
+      ]);
+      setDbStatus(dbRes?.supabase || null);
+      if (sqlRes?.sql) setSqlContent(sqlRes.sql);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const handleCopySql = () => {
+    if (!sqlContent) return;
+    navigator.clipboard.writeText(sqlContent);
+    setSqlCopied(true);
+    setTimeout(() => setSqlCopied(false), 3000);
+  };
+
   return (
     <div className="space-y-6 max-w-4xl">
       {/* Tabs */}
@@ -199,11 +232,15 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
           { id: 'social', label: 'Social Links' },
           { id: 'seo', label: 'SEO Defaults' },
           { id: 'migration', label: 'Backup & WordPress Tools' },
+          { id: 'database', label: 'Supabase Database' },
         ].map((tab) => (
           <button
             key={tab.id}
             type="button"
-            onClick={() => setActiveTab(tab.id as any)}
+            onClick={() => {
+              setActiveTab(tab.id as any);
+              if (tab.id === 'database') loadDbInfo();
+            }}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
               activeTab === tab.id
                 ? 'bg-brown-deep dark:bg-rose-muted text-paper-warm dark:text-night-bg shadow-sm'
@@ -621,8 +658,121 @@ export function SiteSettingsForm({ initialSettings }: SiteSettingsFormProps) {
             </div>
           )}
 
+          {/* TAB 6: SUPABASE DATABASE & CLOUD SYNC */}
+          {activeTab === 'database' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-serif text-xl font-bold text-brown-deep dark:text-night-text flex items-center gap-2">
+                  <Database className="w-5 h-5 text-rose-muted" />
+                  <span>Supabase PostgreSQL Cloud Integration</span>
+                </h3>
+                <p className="text-xs text-brown-muted dark:text-night-muted mt-1">
+                  Connect Books&Wisdom with your Supabase database so your published articles synchronize permanently across all Vercel servers and visitor devices.
+                </p>
+              </div>
+
+              {/* Status Indicator */}
+              <div className="p-5 rounded-2xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-serif text-base font-bold text-brown-deep dark:text-night-text flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-rose-muted" />
+                    <span>Live Database Connection Status</span>
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={loadDbInfo}
+                    disabled={dbLoading}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-paper-border hover:bg-paper-warm dark:hover:bg-night-surface text-brown-muted transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3 h-3 ${dbLoading ? 'animate-spin' : ''}`} />
+                    <span>Check Connection</span>
+                  </button>
+                </div>
+
+                {dbLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-brown-muted py-3">
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-muted" />
+                    <span>Testing Supabase connection...</span>
+                  </div>
+                ) : dbStatus?.status === 'client_initialized' && dbStatus?.error ? (
+                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs space-y-2 text-amber-900 dark:text-amber-200">
+                    <div className="flex items-center gap-2 font-bold text-amber-950 dark:text-amber-100">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Schema Migration Required (Tables Missing)</span>
+                    </div>
+                    <p className="leading-relaxed">
+                      Supabase connected successfully, but the required tables (<code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">public.articles</code>, <code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded">public.site_settings</code>) have not been created in your Supabase project yet.
+                    </p>
+                    <p className="font-mono text-[11px] text-amber-700 dark:text-amber-300">
+                      Error: {dbStatus.error.message || 'PGRST205'}
+                    </p>
+                  </div>
+                ) : dbStatus?.status === 'client_initialized' && dbStatus?.count !== null ? (
+                  <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs space-y-1 text-emerald-900 dark:text-emerald-200">
+                    <div className="flex items-center gap-2 font-bold text-emerald-950 dark:text-emerald-100">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>Supabase Cloud Connected & Ready!</span>
+                    </div>
+                    <p>
+                      {dbStatus.count} article{dbStatus.count === 1 ? '' : 's'} currently stored in your Supabase database. Cloud sync is 100% active.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 rounded-xl bg-paper-warm/50 border border-paper-border text-xs text-brown-muted space-y-1">
+                    <p className="font-medium text-brown-deep dark:text-night-text">Local Storage Mode Active</p>
+                    <p>Articles are currently saved to local storage.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* 1-Click Migration Guide */}
+              <div className="p-5 rounded-2xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-serif text-base font-bold text-brown-deep dark:text-night-text">
+                      1-Click Supabase SQL Setup (15 Seconds)
+                    </h4>
+                    <p className="text-xs text-brown-muted dark:text-night-muted mt-0.5">
+                      Copy this script and paste it into the Supabase SQL editor to create the required tables and security rules.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopySql}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-rose-muted hover:bg-rose-muted/90 text-white transition-colors"
+                    >
+                      {sqlCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{sqlCopied ? 'Copied SQL!' : 'Copy SQL Script'}</span>
+                    </button>
+                    <a
+                      href="https://supabase.com/dashboard/project/ixyusueytlwqricjjgxw/sql/new"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold border border-brown-muted/30 dark:border-night-border hover:bg-paper-warm dark:hover:bg-night-surface text-brown-deep dark:text-night-text transition-colors"
+                    >
+                      <span>Open SQL Editor</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] text-brown-muted">
+                    <span className="font-mono">supabase/migrations/001_initial_schema.sql</span>
+                    <span>126 lines</span>
+                  </div>
+                  <pre className="p-4 rounded-xl bg-night-bg text-night-text font-mono text-xs leading-relaxed max-h-64 overflow-y-auto border border-night-border select-all">
+                    {sqlContent || '-- Loading schema script...'}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Save Button */}
-          {activeTab !== 'migration' && (
+          {activeTab !== 'migration' && activeTab !== 'database' && (
             <div className="pt-4 border-t border-paper-border/60 flex items-center justify-between">
               <button
                 type="submit"
