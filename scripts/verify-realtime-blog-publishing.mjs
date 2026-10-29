@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.TEST_URL || process.argv[2] || 'http://localhost:3000';
 
 async function main() {
   console.log('🚀 Starting Real-Time Blog Publishing & Main Site Verification...\n');
