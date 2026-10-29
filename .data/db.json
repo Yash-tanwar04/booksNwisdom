@@ -1,16 +1,31 @@
 {
   "articles": [
     {
-      "id": "9ef1d819-0119-4815-9792-1c5c1f545651",
+      "id": "89dd9d9f-0fb8-4efc-95c3-e429169fe125",
       "title": "Smart boy",
       "subtitle": null,
       "slug": "smart-boy",
-      "excerpt": "A personal reflection from Books&Wisdom.",
+      "excerpt": "S Ma",
       "content": {
         "type": "doc",
         "content": [
           {
-            "type": "paragraph"
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "S"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Ma"
+              }
+            ]
           }
         ]
       },
@@ -22,8 +37,8 @@
       "seo_description": null,
       "reading_time_minutes": 1,
       "views_count": 0,
-      "created_at": "2026-10-29T13:03:25.854Z",
-      "updated_at": "2026-10-29T13:03:25.854Z",
+      "created_at": "2026-10-29T13:03:26.975Z",
+      "updated_at": "2026-10-29T13:03:26.975Z",
       "author_id": "admin-1"
     },
     {
