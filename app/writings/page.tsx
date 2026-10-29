@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   description: 'Thoughts, experiences, and reflections — collected in one place.',
 };
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AllWritingsPage() {
   const { articles, total } = await getPublishedArticles({ limit: 6 });

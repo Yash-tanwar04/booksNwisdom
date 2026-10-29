@@ -19,6 +19,7 @@ import { formatDate } from '@/lib/utils';
 import { WashiTape } from '@/components/decorations/WashiTape';
 import { FloralAccent } from '@/components/decorations/FloralAccent';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0; // Dynamic admin dashboard
 
 export default async function AdminDashboardPage() {
@@ -70,8 +71,8 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 4 Stat Cards Matching Target UI */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {/* 3 Real Studio Stat Cards (Published, Drafts, Media Files) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         {/* Published */}
         <Link href="/admin/writings?status=published" className="paper-card p-5 relative overflow-hidden group hover:border-emerald-500 transition-all">
           <div className="flex items-center justify-between text-xs text-brown-muted dark:text-night-muted mb-2 font-medium">
@@ -99,20 +100,6 @@ export default async function AdminDashboardPage() {
             in progress (click to view)
           </div>
         </Link>
-
-        {/* Total Views */}
-        <div className="paper-card p-5 relative overflow-hidden">
-          <div className="flex items-center justify-between text-xs text-brown-muted dark:text-night-muted mb-2 font-medium">
-            <span>Total Views</span>
-            <Eye className="w-3.5 h-3.5 text-rose-muted" />
-          </div>
-          <div className="font-serif text-3xl sm:text-4xl font-bold text-brown-deep dark:text-night-text">
-            {stats.totalViews}
-          </div>
-          <div className="text-[11px] text-brown-muted mt-1 font-handwriting text-base">
-            readers inspired
-          </div>
-        </div>
 
         {/* Media Files */}
         <Link href="/admin/media" className="paper-card p-5 relative overflow-hidden group hover:border-rose-muted transition-all">

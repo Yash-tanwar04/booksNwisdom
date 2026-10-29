@@ -58,6 +58,10 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
 
   // State
   const [id, setId] = useState<string | undefined>(initialArticle?.id);
+  const articleIdRef = useRef<string | undefined>(initialArticle?.id);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState<boolean>(Boolean(initialArticle?.slug));
+
   const [title, setTitle] = useState(initialArticle?.title || '');
   const [subtitle, setSubtitle] = useState(initialArticle?.subtitle || '');
   const [slug, setSlug] = useState(initialArticle?.slug || '');
@@ -69,6 +73,7 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
 
   // UI state
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
+  const [saveErrorMsg, setSaveErrorMsg] = useState<string | null>(null);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [seoCollapsed, setSeoCollapsed] = useState(true);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -76,12 +81,29 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [libraryPickerOpen, setLibraryPickerOpen] = useState(false);
 
+  // Inline Link & Image Toolbar Drawer States
+  const [linkDrawerOpen, setLinkDrawerOpen] = useState(false);
+  const [linkUrlInput, setLinkUrlInput] = useState('');
+  const [linkTextInput, setLinkTextInput] = useState('');
+  const [imageDrawerOpen, setImageDrawerOpen] = useState(false);
+  const [inlineImageUrlInput, setInlineImageUrlInput] = useState('');
+  const [inlineImageAltInput, setInlineImageAltInput] = useState('');
+  const [uploadingInlineImage, setUploadingInlineImage] = useState(false);
+
   // TipTap Editor instance
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: {
           levels: [1, 2, 3],
+        },
+        bulletList: {
+          keepMarks: true,
+          keepAttributes: false,
+        },
+        orderedList: {
+          keepMarks: true,
+          keepAttributes: false,
         },
       }),
       Underline,
@@ -116,30 +138,41 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
   const wordCount = extractTextFromContent(currentContent).split(/\s+/).filter(Boolean).length;
   const readingTime = calculateReadingTime(currentContent);
 
-  // Auto-generate slug from title if new
+  // Keep slug synchronized with title until the user manually edits the custom slug field
   useEffect(() => {
-    if (!initialArticle?.id && title && !slug) {
+    if (!slugManuallyEdited && title.trim()) {
       setSlug(slugify(title));
     }
-  }, [title, slug, initialArticle?.id]);
+  }, [title, slugManuallyEdited]);
 
   // Save / Autosave handler
   const performSave = useCallback(
-    async (overrideStatus?: 'draft' | 'published') => {
-      if (!title.trim() && !editor?.getText().trim()) {
-        return;
+    async (overrideStatus?: 'draft' | 'published'): Promise<Article | null> => {
+      const editorText = editor?.getText().trim() || '';
+      if (!title.trim() && !editorText && !overrideStatus) {
+        return null;
+      }
+
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+        autosaveTimerRef.current = null;
       }
 
       setSaveStatus('saving');
+      setSaveErrorMsg(null);
       const articleStatus = overrideStatus || status;
+      const finalTitle = title.trim() || 'Untitled Reflection';
+      const baseSlug = (!slugManuallyEdited && title.trim())
+        ? slugify(title.trim())
+        : (slug.trim() ? slugify(slug.trim()) : slugify(finalTitle));
 
       const payload = {
-        id,
-        title: title.trim() || 'Untitled Reflection',
+        id: articleIdRef.current || id,
+        title: finalTitle,
         subtitle: subtitle.trim() || null,
-        slug: slug.trim() || slugify(title || 'untitled-reflection'),
+        slug: baseSlug || `reflection-${Date.now()}`,
         excerpt: excerpt.trim() || undefined,
-        content: editor?.getJSON() || { type: 'doc', content: [] },
+        content: editor?.getJSON() || { type: 'doc', content: [{ type: 'paragraph' }] },
         cover_image_path: coverImagePath,
         status: articleStatus,
         seo_title: seoTitle.trim() || null,
@@ -153,39 +186,48 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
           body: JSON.stringify(payload),
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          if (data.article) {
-            setId(data.article.id);
-            setSlug(data.article.slug);
-            setStatus(data.article.status);
-            setSaveStatus('saved');
-            const now = new Date();
-            setLastSavedTime(
-              now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            );
-          }
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.article) {
+          articleIdRef.current = data.article.id;
+          setId(data.article.id);
+          setSlug(data.article.slug);
+          setStatus(data.article.status);
+          setSaveStatus('saved');
+          const now = new Date();
+          setLastSavedTime(
+            now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          );
+          return data.article as Article;
         } else {
           setSaveStatus('error');
+          setSaveErrorMsg(data.error || 'Failed to save reflection');
+          return null;
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Save error', err);
         setSaveStatus('error');
+        setSaveErrorMsg(err?.message || 'Network error while saving');
+        return null;
       }
     },
-    [id, title, subtitle, slug, excerpt, coverImagePath, status, seoTitle, seoDescription, editor]
+    [id, title, subtitle, slug, slugManuallyEdited, excerpt, coverImagePath, status, seoTitle, seoDescription, editor]
   );
 
-  // Debounced Autosave (1.5 seconds)
+  // Debounced Autosave (2.5 seconds)
   useEffect(() => {
-    if (saveStatus !== 'unsaved') return;
+    if (saveStatus !== 'unsaved' || isPublishing) return;
 
-    const timer = setTimeout(() => {
+    autosaveTimerRef.current = setTimeout(() => {
       performSave();
-    }, 1500);
+    }, 2500);
 
-    return () => clearTimeout(timer);
-  }, [saveStatus, performSave]);
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [saveStatus, isPublishing, performSave]);
 
   // Warn before unload if unsaved changes
   useEffect(() => {
@@ -245,10 +287,11 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
   };
 
   const handleDuplicatePost = async () => {
-    if (!id) return;
+    const currentId = articleIdRef.current || id;
+    if (!currentId) return;
     setIsDuplicating(true);
     try {
-      const res = await fetch(`/api/articles/${id}/duplicate`, { method: 'POST' });
+      const res = await fetch(`/api/articles/${currentId}/duplicate`, { method: 'POST' });
       if (res.ok) {
         const data = await res.json();
         router.push(`/admin/writings/${data.article.id}/edit`);
@@ -260,61 +303,122 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
     }
   };
 
-  // Insert image at cursor into TipTap
-  const handleInsertInlineImage = async () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async () => {
-      const file = input.files?.[0];
-      if (!file || !editor) return;
-
-      const altInput = window.prompt('Enter image description (alt text) for readers:', 'Editorial reflection photograph') || 'Editorial reflection photograph';
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('alt_text', altInput);
-
-      try {
-        const res = await fetch('/api/media', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          editor.chain().focus().setImage({ src: data.media.url, alt: altInput }).run();
-          setSaveStatus('unsaved');
-        }
-      } catch (err) {
-        console.error('Inline image upload failed', err);
-      }
-    };
-    input.click();
+  // Open Inline Image Drawer
+  const handleToggleImageDrawer = () => {
+    setLinkDrawerOpen(false);
+    setImageDrawerOpen((prev) => !prev);
   };
 
-  // Insert link
-  const handleInsertLink = () => {
-    if (!editor) return;
-    const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('Enter hyperlink URL:', previousUrl);
+  // Upload inline image file from drawer
+  const handleUploadInlineImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    setUploadingInlineImage(true);
+    const altText = inlineImageAltInput.trim() || title.trim() || 'Editorial reflection photograph';
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('alt_text', altText);
 
-    if (url === null) return;
-    if (url === '') {
+    try {
+      const res = await fetch('/api/media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        editor.chain().focus().setImage({ src: data.media.url, alt: altText, title: inlineImageAltInput.trim() || undefined }).run();
+        setSaveStatus('unsaved');
+        setImageDrawerOpen(false);
+        setInlineImageAltInput('');
+      }
+    } catch (err) {
+      console.error('Inline image upload failed', err);
+    } finally {
+      setUploadingInlineImage(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleInsertInlineImageByUrl = (srcUrl: string, customAlt?: string) => {
+    if (!editor || !srcUrl.trim()) return;
+    const altText = customAlt || inlineImageAltInput.trim() || title.trim() || 'Editorial reflection photograph';
+    editor.chain().focus().setImage({ src: srcUrl.trim(), alt: altText, title: customAlt || inlineImageAltInput.trim() || undefined }).run();
+    setSaveStatus('unsaved');
+    setImageDrawerOpen(false);
+    setInlineImageUrlInput('');
+    setInlineImageAltInput('');
+  };
+
+  // Open Link Drawer
+  const handleToggleLinkDrawer = () => {
+    if (!editor) return;
+    setImageDrawerOpen(false);
+    const previousUrl = editor.getAttributes('link').href || '';
+    const { from, to } = editor.state.selection;
+    const selectedText = editor.state.doc.textBetween(from, to, ' ');
+    setLinkUrlInput(previousUrl);
+    setLinkTextInput(selectedText);
+    setLinkDrawerOpen((prev) => !prev);
+  };
+
+  const handleApplyLink = () => {
+    if (!editor) return;
+    const rawUrl = linkUrlInput.trim();
+    if (!rawUrl) {
       editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      setLinkDrawerOpen(false);
+      setSaveStatus('unsaved');
       return;
     }
 
-    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+    const normalizedUrl =
+      rawUrl.startsWith('http://') || rawUrl.startsWith('https://') || rawUrl.startsWith('/') || rawUrl.startsWith('mailto:')
+        ? rawUrl
+        : `https://${rawUrl}`;
+
+    const { empty } = editor.state.selection;
+    if (empty && !editor.isActive('link')) {
+      const display = linkTextInput.trim() || normalizedUrl;
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text: display,
+          marks: [{ type: 'link', attrs: { href: normalizedUrl } }],
+        })
+        .run();
+    } else {
+      editor.chain().focus().extendMarkRange('link').setLink({ href: normalizedUrl }).run();
+    }
+
+    setLinkDrawerOpen(false);
+    setLinkUrlInput('');
+    setLinkTextInput('');
+    setSaveStatus('unsaved');
+  };
+
+  const handleRemoveLink = () => {
+    if (!editor) return;
+    editor.chain().focus().extendMarkRange('link').unsetLink().run();
+    setLinkDrawerOpen(false);
     setSaveStatus('unsaved');
   };
 
   // Publish action
   const handlePublish = async () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
     setIsPublishing(true);
-    await performSave('published');
+    const saved = await performSave('published');
     setIsPublishing(false);
-    router.push('/admin/writings');
-    router.refresh();
+    if (saved) {
+      router.push('/admin/writings');
+      router.refresh();
+    }
   };
 
   return (
@@ -351,7 +455,7 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
             )}
             {saveStatus === 'error' && (
               <span className="text-red-500 font-medium">
-                Error saving changes
+                {saveErrorMsg || 'Error saving changes'}
               </span>
             )}
           </div>
@@ -574,172 +678,344 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
 
         {/* TipTap Toolbar */}
         {editor && (
-          <div className="sticky top-32 z-10 p-2 rounded-xl bg-paper-warm dark:bg-night-card border border-paper-border/80 dark:border-night-border flex flex-wrap items-center gap-1 text-brown-deep dark:text-night-text shadow-sm">
-            {/* Paragraph */}
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().setParagraph().run()}
-              className={`p-2 rounded-lg text-xs font-semibold ${
-                editor.isActive('paragraph') ? 'bg-[#D8A5A0]/40 text-brown-deep' : 'hover:bg-paper-blush/40'
-              }`}
-              title="Normal Paragraph"
-            >
-              <Pilcrow className="w-4 h-4" />
-            </button>
+          <div className="sticky top-32 z-10 space-y-2">
+            <div className="p-2 rounded-xl bg-paper-warm dark:bg-night-card border border-paper-border/80 dark:border-night-border flex flex-wrap items-center gap-1 text-brown-deep dark:text-night-text shadow-sm">
+              {/* Paragraph */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().setParagraph().run()}
+                className={`p-2 rounded-lg text-xs font-semibold ${
+                  editor.isActive('paragraph') && !editor.isActive('bulletList') && !editor.isActive('orderedList') && !editor.isActive('blockquote')
+                    ? 'bg-[#D8A5A0]/40 text-brown-deep'
+                    : 'hover:bg-paper-blush/40'
+                }`}
+                title="Normal Paragraph"
+              >
+                <Pilcrow className="w-4 h-4" />
+              </button>
 
-            {/* Headings */}
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-              className={`p-2 rounded-lg ${
-                editor.isActive('heading', { level: 1 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
-              }`}
-              title="Heading 1"
-            >
-              <Heading1 className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={`p-2 rounded-lg ${
-                editor.isActive('heading', { level: 2 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
-              }`}
-              title="Heading 2"
-            >
-              <Heading2 className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-              className={`p-2 rounded-lg ${
-                editor.isActive('heading', { level: 3 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
-              }`}
-              title="Heading 3"
-            >
-              <Heading3 className="w-4 h-4" />
-            </button>
+              {/* Headings */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+                className={`p-2 rounded-lg ${
+                  editor.isActive('heading', { level: 1 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
+                }`}
+                title="Heading 1"
+              >
+                <Heading1 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+                className={`p-2 rounded-lg ${
+                  editor.isActive('heading', { level: 2 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
+                }`}
+                title="Heading 2"
+              >
+                <Heading2 className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+                className={`p-2 rounded-lg ${
+                  editor.isActive('heading', { level: 3 }) ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'
+                }`}
+                title="Heading 3"
+              >
+                <Heading3 className="w-4 h-4" />
+              </button>
 
-            <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
+              <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
 
-            {/* Bold, Italic, Underline, Strike */}
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 rounded-lg ${editor.isActive('bold') ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'}`}
-              title="Bold (Ctrl+B)"
-            >
-              <Bold className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded-lg ${editor.isActive('italic') ? 'bg-[#D8A5A0]/40 italic' : 'hover:bg-paper-blush/40'}`}
-              title="Italic (Ctrl+I)"
-            >
-              <Italic className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 rounded-lg ${editor.isActive('underline') ? 'bg-[#D8A5A0]/40 underline' : 'hover:bg-paper-blush/40'}`}
-              title="Underline"
-            >
-              <UnderlineIcon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`p-2 rounded-lg ${editor.isActive('strike') ? 'bg-[#D8A5A0]/40 line-through' : 'hover:bg-paper-blush/40'}`}
-              title="Strikethrough"
-            >
-              <Strikethrough className="w-4 h-4" />
-            </button>
+              {/* Bold, Italic, Underline, Strike */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleBold().run()}
+                className={`p-2 rounded-lg ${editor.isActive('bold') ? 'bg-[#D8A5A0]/40 font-bold' : 'hover:bg-paper-blush/40'}`}
+                title="Bold (Ctrl+B)"
+              >
+                <Bold className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleItalic().run()}
+                className={`p-2 rounded-lg ${editor.isActive('italic') ? 'bg-[#D8A5A0]/40 italic' : 'hover:bg-paper-blush/40'}`}
+                title="Italic (Ctrl+I)"
+              >
+                <Italic className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleUnderline().run()}
+                className={`p-2 rounded-lg ${editor.isActive('underline') ? 'bg-[#D8A5A0]/40 underline' : 'hover:bg-paper-blush/40'}`}
+                title="Underline"
+              >
+                <UnderlineIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleStrike().run()}
+                className={`p-2 rounded-lg ${editor.isActive('strike') ? 'bg-[#D8A5A0]/40 line-through' : 'hover:bg-paper-blush/40'}`}
+                title="Strikethrough"
+              >
+                <Strikethrough className="w-4 h-4" />
+              </button>
 
-            <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
+              <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
 
-            {/* Lists & Quotes */}
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded-lg ${editor.isActive('bulletList') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
-              title="Bulleted List"
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-2 rounded-lg ${editor.isActive('orderedList') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
-              title="Numbered List"
-            >
-              <ListOrdered className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleBlockquote().run()}
-              className={`p-2 rounded-lg ${editor.isActive('blockquote') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
-              title="Blockquote"
-            >
-              <Quote className="w-4 h-4" />
-            </button>
+              {/* Lists & Quotes */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                className={`p-2 rounded-lg ${editor.isActive('bulletList') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
+                title="Bulleted List"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                className={`p-2 rounded-lg ${editor.isActive('orderedList') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
+                title="Numbered List"
+              >
+                <ListOrdered className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  if (editor.isActive('bulletList')) {
+                    editor.chain().focus().toggleBulletList().toggleBlockquote().run();
+                  } else if (editor.isActive('orderedList')) {
+                    editor.chain().focus().toggleOrderedList().toggleBlockquote().run();
+                  } else {
+                    editor.chain().focus().toggleBlockquote().run();
+                  }
+                }}
+                className={`p-2 rounded-lg ${editor.isActive('blockquote') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
+                title="Blockquote"
+              >
+                <Quote className="w-4 h-4" />
+              </button>
 
-            <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
+              <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
 
-            {/* Media & Links */}
-            <button
-              type="button"
-              onClick={handleInsertLink}
-              className={`p-2 rounded-lg ${editor.isActive('link') ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
-              title="Insert Link (Ctrl+K)"
-            >
-              <LinkIcon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={handleInsertInlineImage}
-              className="p-2 rounded-lg hover:bg-paper-blush/40"
-              title="Insert Image Between Paragraphs"
-            >
-              <ImageIcon className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().setHorizontalRule().run()}
-              className="p-2 rounded-lg hover:bg-paper-blush/40"
-              title="Horizontal Divider"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
+              {/* Media & Links */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleToggleLinkDrawer}
+                className={`p-2 rounded-lg ${editor.isActive('link') || linkDrawerOpen ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
+                title="Insert Link (Ctrl+K)"
+              >
+                <LinkIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={handleToggleImageDrawer}
+                className={`p-2 rounded-lg ${imageDrawerOpen ? 'bg-[#D8A5A0]/40' : 'hover:bg-paper-blush/40'}`}
+                title="Insert Image Between Paragraphs"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().setHorizontalRule().run()}
+                className="p-2 rounded-lg hover:bg-paper-blush/40"
+                title="Horizontal Divider"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
 
-            <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
+              <div className="h-5 w-[1px] bg-paper-border/80 mx-1" />
 
-            {/* Undo / Redo */}
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().undo().run()}
-              disabled={!editor.can().undo()}
-              className="p-2 rounded-lg hover:bg-paper-blush/40 disabled:opacity-30"
-              title="Undo (Ctrl+Z)"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().redo().run()}
-              disabled={!editor.can().redo()}
-              className="p-2 rounded-lg hover:bg-paper-blush/40 disabled:opacity-30"
-              title="Redo"
-            >
-              <RotateCw className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
-              className="p-2 rounded-lg hover:bg-paper-blush/40"
-              title="Clear Formatting"
-            >
-              <RemoveFormatting className="w-4 h-4" />
-            </button>
+              {/* Undo / Redo */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().undo().run()}
+                disabled={!editor.can().undo()}
+                className="p-2 rounded-lg hover:bg-paper-blush/40 disabled:opacity-30"
+                title="Undo (Ctrl+Z)"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().redo().run()}
+                disabled={!editor.can().redo()}
+                className="p-2 rounded-lg hover:bg-paper-blush/40 disabled:opacity-30"
+                title="Redo"
+              >
+                <RotateCw className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  let chain = editor.chain().focus().unsetAllMarks().clearNodes();
+                  if (editor.isActive('bulletList')) chain = chain.toggleBulletList();
+                  if (editor.isActive('orderedList')) chain = chain.toggleOrderedList();
+                  if (editor.isActive('blockquote')) chain = chain.toggleBlockquote();
+                  chain.run();
+                }}
+                className="p-2 rounded-lg hover:bg-paper-blush/40"
+                title="Clear Formatting"
+              >
+                <RemoveFormatting className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Inline Link Insertion Drawer */}
+            {linkDrawerOpen && (
+              <div className="p-3.5 rounded-xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border shadow-md flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 text-xs">
+                <input
+                  type="text"
+                  value={linkTextInput}
+                  onChange={(e) => setLinkTextInput(e.target.value)}
+                  placeholder="Link text (optional if text selected)..."
+                  className="px-3 py-2 rounded-lg bg-paper-warm dark:bg-night-surface border border-paper-border dark:border-night-border text-brown-deep dark:text-night-text outline-none flex-1"
+                />
+                <input
+                  type="url"
+                  value={linkUrlInput}
+                  onChange={(e) => setLinkUrlInput(e.target.value)}
+                  placeholder="https://example.com or /writings/..."
+                  className="px-3 py-2 rounded-lg bg-paper-warm dark:bg-night-surface border border-paper-border dark:border-night-border text-brown-deep dark:text-night-text outline-none flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleApplyLink();
+                    }
+                  }}
+                />
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleApplyLink}
+                    className="px-4 py-2 rounded-lg bg-[#B87873] hover:bg-[#A25F5A] text-white font-semibold transition-colors"
+                  >
+                    Apply Link
+                  </button>
+                  {editor.isActive('link') && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveLink}
+                      className="px-3 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 font-semibold transition-colors"
+                    >
+                      Unlink
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setLinkDrawerOpen(false)}
+                    className="p-2 rounded-lg text-brown-muted hover:text-brown-deep"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Inline Image Insertion Drawer */}
+            {imageDrawerOpen && (
+              <div className="p-4 rounded-xl bg-paper-cream dark:bg-night-card border border-paper-border dark:border-night-border shadow-md space-y-3 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-serif text-sm font-bold text-brown-deep dark:text-night-text">
+                    Insert Image into Reflection
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setImageDrawerOpen(false)}
+                    className="text-brown-muted hover:text-brown-deep"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 items-center">
+                  <input
+                    type="text"
+                    value={inlineImageAltInput}
+                    onChange={(e) => setInlineImageAltInput(e.target.value)}
+                    placeholder="Caption / Alt description (optional)..."
+                    className="px-3 py-2 rounded-lg bg-paper-warm dark:bg-night-surface border border-paper-border dark:border-night-border text-brown-deep dark:text-night-text outline-none"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={inlineImageUrlInput}
+                      onChange={(e) => setInlineImageUrlInput(e.target.value)}
+                      placeholder="Paste image URL (/images/... or https://)"
+                      className="px-3 py-2 rounded-lg bg-paper-warm dark:bg-night-surface border border-paper-border dark:border-night-border text-brown-deep dark:text-night-text outline-none flex-1"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleInsertInlineImageByUrl(inlineImageUrlInput)}
+                      disabled={!inlineImageUrlInput.trim()}
+                      className="px-3 py-2 rounded-lg bg-[#B87873] text-white font-semibold disabled:opacity-40 whitespace-nowrap"
+                    >
+                      Insert URL
+                    </button>
+                  </div>
+                  <label className="cursor-pointer inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-paper-blush/80 hover:bg-rose-dusty/50 text-brown-deep font-semibold transition-colors text-center">
+                    {uploadingInlineImage ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Upload from Device</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadInlineImageFile}
+                      disabled={uploadingInlineImage}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="pt-1">
+                  <p className="text-[11px] text-brown-muted mb-1.5">
+                    Or click any photograph from the Books&amp;Wisdom Visual Library to insert directly:
+                  </p>
+                  <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-1.5 max-h-28 overflow-y-auto pr-1">
+                    {CURATED_WRITING_COVERS.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleInsertInlineImageByUrl(item.path, item.title)}
+                        className="group relative rounded-md overflow-hidden border border-paper-border/60 hover:border-rose-muted transition-all"
+                        title={`Insert ${item.title}`}
+                      >
+                        <div className="relative aspect-[3/2] w-full bg-paper-blush/30">
+                          <Image src={item.path} alt={item.title} fill sizes="90px" className="object-cover" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -785,6 +1061,7 @@ export function TipTapEditor({ initialArticle }: TipTapEditorProps) {
                     type="text"
                     value={slug}
                     onChange={(e) => {
+                      setSlugManuallyEdited(true);
                       setSlug(slugify(e.target.value));
                       setSaveStatus('unsaved');
                     }}

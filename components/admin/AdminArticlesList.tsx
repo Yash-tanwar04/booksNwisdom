@@ -43,6 +43,26 @@ export function AdminArticlesList({ initialArticles }: AdminArticlesListProps) {
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    setArticles(initialArticles);
+  }, [initialArticles]);
+
+  // Also fetch latest articles with no-store on mount so client router cache never hides newly published posts
+  useEffect(() => {
+    let active = true;
+    fetch('/api/articles?admin=1', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (active && data && Array.isArray(data.articles)) {
+          setArticles(data.articles);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const param = searchParams?.get('status');
     if (param === 'draft' || param === 'published' || param === 'all') {
       setStatusFilter(param);

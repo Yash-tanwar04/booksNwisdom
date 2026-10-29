@@ -82,11 +82,16 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
 
             case 'bulletList': {
               return (
-                <ul key={idx} className="list-disc list-inside space-y-2 pl-2 text-brown-dark/85 dark:text-night-muted">
+                <ul key={idx} className="list-disc pl-6 space-y-2.5 text-brown-dark/90 dark:text-night-text my-4">
                   {node.content?.map((item: any, iIdx: number) => (
-                    <li key={iIdx} className="leading-relaxed">
+                    <li key={iIdx} className="leading-relaxed pl-1">
                       {item.content?.map((sub: any, sIdx: number) => (
-                        <span key={sIdx}>{renderTextMarks(sub.content)}</span>
+                        <React.Fragment key={sIdx}>
+                          {sub.type === 'paragraph' ? renderTextMarks(sub.content) : null}
+                          {sub.type === 'bulletList' || sub.type === 'orderedList' ? (
+                            <ArticleRenderer content={{ type: 'doc', content: [sub] }} />
+                          ) : null}
+                        </React.Fragment>
                       ))}
                     </li>
                   ))}
@@ -96,11 +101,16 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
 
             case 'orderedList': {
               return (
-                <ol key={idx} className="list-decimal list-inside space-y-2 pl-2 text-brown-dark/85 dark:text-night-muted">
+                <ol key={idx} className="list-decimal pl-6 space-y-2.5 text-brown-dark/90 dark:text-night-text my-4">
                   {node.content?.map((item: any, iIdx: number) => (
-                    <li key={iIdx} className="leading-relaxed">
+                    <li key={iIdx} className="leading-relaxed pl-1">
                       {item.content?.map((sub: any, sIdx: number) => (
-                        <span key={sIdx}>{renderTextMarks(sub.content)}</span>
+                        <React.Fragment key={sIdx}>
+                          {sub.type === 'paragraph' ? renderTextMarks(sub.content) : null}
+                          {sub.type === 'bulletList' || sub.type === 'orderedList' ? (
+                            <ArticleRenderer content={{ type: 'doc', content: [sub] }} />
+                          ) : null}
+                        </React.Fragment>
                       ))}
                     </li>
                   ))}
@@ -113,15 +123,21 @@ export function ArticleRenderer({ content }: ArticleRendererProps) {
               const alt = node.attrs?.alt || 'Article visual';
               const title = node.attrs?.title;
               if (!src) return null;
+              const isExternalOrData = src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://');
 
               return (
                 <figure key={idx} className="my-8 paper-card p-3 overflow-hidden">
                   <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden bg-paper-blush/30">
-                    <Image src={src} alt={alt} fill className="object-cover" />
+                    {isExternalOrData ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={src} alt={alt} className="w-full h-full object-cover" />
+                    ) : (
+                      <Image src={src} alt={alt} fill className="object-cover" />
+                    )}
                   </div>
-                  {title && (
+                  {(title || (alt && alt !== 'Article visual' && alt !== 'Editorial reflection photograph')) && (
                     <figcaption className="text-center font-handwriting text-base text-brown-muted dark:text-night-muted mt-3">
-                      {title}
+                      {title || alt}
                     </figcaption>
                   )}
                 </figure>
@@ -153,6 +169,22 @@ function renderTextMarks(content?: any[]): React.ReactNode {
   if (!content) return null;
 
   return content.map((item, idx) => {
+    if (item.type === 'hardBreak') {
+      return <br key={idx} />;
+    }
+
+    if (item.type === 'image' && item.attrs?.src) {
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={idx}
+          src={item.attrs.src}
+          alt={item.attrs.alt || 'Article image'}
+          className="rounded-xl max-w-full my-6 mx-auto paper-card p-2 shadow-sm block"
+        />
+      );
+    }
+
     if (item.type === 'text') {
       let textNode: React.ReactNode = item.text;
 

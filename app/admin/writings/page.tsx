@@ -3,6 +3,7 @@ import { getAllArticlesAdmin } from '@/lib/db';
 import { AdminArticlesList } from '@/components/admin/AdminArticlesList';
 import { WashiTape } from '@/components/decorations/WashiTape';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function AdminWritingsPage() {

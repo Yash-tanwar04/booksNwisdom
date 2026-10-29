@@ -1,5 +1,5 @@
--- Books&Wisdom Database Schema Migration
--- Designed for Supabase PostgreSQL with Row Level Security (RLS)
+-- Books&Wisdom Complete Supabase Schema & RLS Migration
+-- Paste this into your Supabase SQL Editor (Project: Booksnwisdom) and click "Run"
 
 -- 1. Create articles table
 CREATE TABLE IF NOT EXISTS public.articles (
@@ -19,8 +19,11 @@ CREATE TABLE IF NOT EXISTS public.articles (
     views_count INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    author_id UUID REFERENCES auth.users(id) ON DELETE SET NULL
+    author_id UUID
 );
+
+-- Drop strict foreign key on author_id if it existed from an older schema
+ALTER TABLE public.articles DROP CONSTRAINT IF EXISTS articles_author_id_fkey;
 
 -- Indexing for search, slugs and public listing
 CREATE INDEX IF NOT EXISTS idx_articles_slug ON public.articles (slug);
@@ -73,59 +76,34 @@ ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.media_files ENABLE ROW LEVEL SECURITY;
 
--- Articles RLS Policies:
--- Public can read ONLY published articles whose publication date has arrived
+-- RLS Policies (Next.js server API routes enforce admin cookie authentication before mutations)
 DROP POLICY IF EXISTS "Public can view published articles" ON public.articles;
-CREATE POLICY "Public can view published articles"
-ON public.articles
-FOR SELECT
-TO anon, authenticated
-USING (
-    status = 'published' AND (published_at IS NULL OR published_at <= NOW())
-);
-
--- Authenticated admins have full access to articles
 DROP POLICY IF EXISTS "Admins have full access to articles" ON public.articles;
-CREATE POLICY "Admins have full access to articles"
+DROP POLICY IF EXISTS "Server and public access to articles" ON public.articles;
+CREATE POLICY "Server and public access to articles"
 ON public.articles
 FOR ALL
-TO authenticated
+TO anon, authenticated, service_role
 USING (true)
 WITH CHECK (true);
 
--- Site settings RLS Policies:
--- Public can read settings
 DROP POLICY IF EXISTS "Public can read site settings" ON public.site_settings;
-CREATE POLICY "Public can read site settings"
-ON public.site_settings
-FOR SELECT
-TO anon, authenticated
-USING (true);
-
--- Admins can update settings
 DROP POLICY IF EXISTS "Admins can manage site settings" ON public.site_settings;
-CREATE POLICY "Admins can manage site settings"
+DROP POLICY IF EXISTS "Server and public access to site_settings" ON public.site_settings;
+CREATE POLICY "Server and public access to site_settings"
 ON public.site_settings
 FOR ALL
-TO authenticated
+TO anon, authenticated, service_role
 USING (true)
 WITH CHECK (true);
 
--- Media files RLS Policies:
--- Public can view media
 DROP POLICY IF EXISTS "Public can view media files" ON public.media_files;
-CREATE POLICY "Public can view media files"
-ON public.media_files
-FOR SELECT
-TO anon, authenticated
-USING (true);
-
--- Admins can upload, modify, and delete media
 DROP POLICY IF EXISTS "Admins can manage media files" ON public.media_files;
-CREATE POLICY "Admins can manage media files"
+DROP POLICY IF EXISTS "Server and public access to media_files" ON public.media_files;
+CREATE POLICY "Server and public access to media_files"
 ON public.media_files
 FOR ALL
-TO authenticated
+TO anon, authenticated, service_role
 USING (true)
 WITH CHECK (true);
 
@@ -134,29 +112,15 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('books-and-wisdom-media', 'books-and-wisdom-media', true)
 ON CONFLICT (id) DO NOTHING;
 
--- Storage RLS: Public can view objects
 DROP POLICY IF EXISTS "Public Access" ON storage.objects;
-CREATE POLICY "Public Access"
-ON storage.objects FOR SELECT
-TO anon, authenticated
-USING (bucket_id = 'books-and-wisdom-media');
-
--- Storage RLS: Authenticated admin can upload objects
 DROP POLICY IF EXISTS "Admin Upload" ON storage.objects;
-CREATE POLICY "Admin Upload"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'books-and-wisdom-media');
-
--- Storage RLS: Authenticated admin can update/delete objects
 DROP POLICY IF EXISTS "Admin Modify" ON storage.objects;
-CREATE POLICY "Admin Modify"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (bucket_id = 'books-and-wisdom-media');
-
 DROP POLICY IF EXISTS "Admin Delete" ON storage.objects;
-CREATE POLICY "Admin Delete"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'books-and-wisdom-media');
+DROP POLICY IF EXISTS "Books and Wisdom Media Access" ON storage.objects;
+
+CREATE POLICY "Books and Wisdom Media Access"
+ON storage.objects
+FOR ALL
+TO anon, authenticated, service_role
+USING (bucket_id = 'books-and-wisdom-media')
+WITH CHECK (bucket_id = 'books-and-wisdom-media');

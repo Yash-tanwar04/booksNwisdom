@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import { Search, X, Loader2 } from 'lucide-react';
 import { Article } from '@/types';
@@ -20,6 +20,12 @@ export function WritingsFeed({ initialArticles, totalCount }: WritingsFeedProps)
   const [hasMore, setHasMore] = useState(initialArticles.length < totalCount);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setArticles(initialArticles);
+    setOffset(initialArticles.length);
+    setHasMore(initialArticles.length < totalCount);
+  }, [initialArticles, totalCount]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;

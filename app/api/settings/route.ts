@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getSiteSettings, updateSiteSettings } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 import fs from 'fs';
 import path from 'path';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -39,6 +42,13 @@ export async function POST(req: Request) {
     }
 
     const updated = await updateSiteSettings(body);
+
+    revalidatePath('/', 'layout');
+    revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/admin');
+    revalidatePath('/admin/settings');
+
     return NextResponse.json({ settings: updated });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

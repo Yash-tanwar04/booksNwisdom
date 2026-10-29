@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { isAuthenticated } from '@/lib/auth';
 import { duplicateArticle } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(
   req: Request,
@@ -16,6 +19,9 @@ export async function POST(
     if (!duplicated) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }
+
+    revalidatePath('/admin');
+    revalidatePath('/admin/writings');
 
     return NextResponse.json({
       success: true,

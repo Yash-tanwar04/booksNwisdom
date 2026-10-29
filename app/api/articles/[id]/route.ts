@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getArticleById, saveArticle, deleteArticle } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 interface Params {
   params: {
@@ -34,11 +37,21 @@ export async function PUT(req: Request, { params }: Params) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const existing = await getArticleById(params.id);
     const body = await req.json();
     const updated = await saveArticle({
+      ...existing,
       ...body,
+      title: body.title || existing?.title || 'Untitled Reflection',
       id: params.id,
     });
+
+    revalidatePath('/', 'layout');
+    revalidatePath('/');
+    revalidatePath('/writings');
+    revalidatePath(`/writings/${updated.slug}`);
+    revalidatePath('/admin');
+    revalidatePath('/admin/writings');
 
     return NextResponse.json({ article: updated });
   } catch (err: any) {
@@ -57,6 +70,12 @@ export async function DELETE(req: Request, { params }: Params) {
     if (!success) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 });
     }
+
+    revalidatePath('/', 'layout');
+    revalidatePath('/');
+    revalidatePath('/writings');
+    revalidatePath('/admin');
+    revalidatePath('/admin/writings');
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

@@ -28,6 +28,225 @@ export const initialSiteSettings: SiteSettings = {
 
 export const initialArticles: Article[] = [
   {
+    id: 'art-007',
+    title: 'The Quiet Art of Letting Go',
+    subtitle: 'Learning to release the versions of life we planned so we can embrace the one unfolding in front of us.',
+    slug: 'the-quiet-art-of-letting-go',
+    excerpt: 'Letting go is rarely a single dramatic decision. More often, it is a quiet daily practice of loosening our grip on what has already passed and making room for peace.',
+    content: {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'We spend so much of our lives holding on—to expectations, to unfinished conversations, to versions of ourselves that belonged to another season. We confuse holding on with strength, when sometimes the bravest thing a heart can do is gently open its hand.',
+            },
+          ],
+        },
+        {
+          type: 'blockquote',
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  type: 'text',
+                  text: 'Peace does not arrive when everything goes according to our plan; it arrives when we stop fighting the chapter that has already ended.',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: 'Why Holding On Feels So Familiar' }],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Even when something weighs heavily on our spirit, familiarity gives us an illusion of control. Replaying old memories or wishing we had spoken differently keeps us connected to a moment we aren’t ready to release. Yet as ',
+            },
+            {
+              type: 'text',
+              marks: [{ type: 'italic' }],
+              text: 'time moves quietly forward',
+            },
+            {
+              type: 'text',
+              text: ', we begin to notice the subtle ways our energy is asking to return to the present:',
+            },
+          ],
+        },
+        {
+          type: 'bulletList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Forgiving our past selves',
+                    },
+                    {
+                      type: 'text',
+                      text: ' for not knowing what only experience could teach us.',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Accepting unanswered questions',
+                    },
+                    {
+                      type: 'text',
+                      text: ' without letting them define our worth.',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      marks: [{ type: 'bold' }],
+                      text: 'Honoring the lesson',
+                    },
+                    {
+                      type: 'text',
+                      text: ' while leaving the heaviness behind.',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'horizontalRule',
+        },
+        {
+          type: 'image',
+          attrs: {
+            src: '/images/writings/letting-go.webp',
+            alt: 'Autumn leaves drifting across calm water in warm evening light',
+            title: 'Every season knows when it is time to release what it has carried.',
+          },
+        },
+        {
+          type: 'heading',
+          attrs: { level: 2 },
+          content: [{ type: 'text', text: 'Three Gentle Steps Toward Emotional Freedom' }],
+        },
+        {
+          type: 'orderedList',
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Name what you are carrying honestly in your journal without judging yourself for still caring.',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Separate the memory from the lesson—keep the wisdom, and allow the ache to soften.',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Turn your attention toward the small, quiet graces waiting in your life today.',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'If you are in a season of transition right now, remember that ',
+            },
+            {
+              type: 'text',
+              marks: [{ type: 'underline' }],
+              text: 'letting go is not losing',
+            },
+            {
+              type: 'text',
+              text: '—it is clearing a quiet space for who you are becoming, one gentle breath at a time. Explore more reflections in our ',
+            },
+            {
+              type: 'text',
+              marks: [{ type: 'link', attrs: { href: '/writings' } }],
+              text: 'collected writings archive',
+            },
+            {
+              type: 'text',
+              text: '.',
+            },
+          ],
+        },
+      ],
+    },
+    cover_image_path: '/images/writings/letting-go.webp',
+    status: 'published',
+    published_at: '2024-02-14T09:00:00Z',
+    reading_time_minutes: 4,
+    views_count: 0,
+    created_at: '2024-02-14T08:00:00Z',
+    updated_at: '2024-02-14T09:00:00Z',
+    seo_title: 'The Quiet Art of Letting Go — Books&Wisdom',
+    seo_description: 'Learning to release the versions of life we planned so we can embrace the one unfolding in front of us.',
+  },
+  {
     id: 'art-001',
     title: 'A Battle Within',
     subtitle: 'Understanding the silent struggles, the unspoken emotions and the journey towards peace with oneself.',
@@ -130,7 +349,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-11-28T09:00:00Z',
     reading_time_minutes: 5,
-    views_count: 142,
+    views_count: 0,
     created_at: '2023-11-28T08:00:00Z',
     updated_at: '2023-11-28T09:00:00Z',
     seo_title: 'A Battle Within — Books&Wisdom',
@@ -169,7 +388,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-11-21T09:00:00Z',
     reading_time_minutes: 4,
-    views_count: 88,
+    views_count: 0,
     created_at: '2023-11-21T08:00:00Z',
     updated_at: '2023-11-21T09:00:00Z',
   },
@@ -197,7 +416,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-11-14T09:00:00Z',
     reading_time_minutes: 3,
-    views_count: 67,
+    views_count: 0,
     created_at: '2023-11-14T08:00:00Z',
     updated_at: '2023-11-14T09:00:00Z',
   },
@@ -225,7 +444,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-11-07T09:00:00Z',
     reading_time_minutes: 3,
-    views_count: 53,
+    views_count: 0,
     created_at: '2023-11-07T08:00:00Z',
     updated_at: '2023-11-07T09:00:00Z',
   },
@@ -253,7 +472,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-10-31T09:00:00Z',
     reading_time_minutes: 4,
-    views_count: 95,
+    views_count: 0,
     created_at: '2023-10-31T08:00:00Z',
     updated_at: '2023-10-31T09:00:00Z',
   },
@@ -281,7 +500,7 @@ export const initialArticles: Article[] = [
     status: 'published',
     published_at: '2023-10-23T09:00:00Z',
     reading_time_minutes: 4,
-    views_count: 74,
+    views_count: 0,
     created_at: '2023-10-23T08:00:00Z',
     updated_at: '2023-10-23T09:00:00Z',
   },

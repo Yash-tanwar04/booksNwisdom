@@ -14,6 +14,9 @@ import { FloralAccent } from '@/components/decorations/FloralAccent';
 import { WaxSealBadge, PostmarkStamp } from '@/components/decorations/ScrapbookDetails';
 import { FadeInUp } from '@/components/animations/Reveal';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageProps {
   params: {
     slug: string;

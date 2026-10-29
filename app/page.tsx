@@ -20,7 +20,8 @@ import {
   TiltPolaroid,
 } from '@/components/animations/Reveal';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function HomePage() {
   const settings = await getSiteSettings();
