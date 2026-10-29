@@ -238,7 +238,7 @@ export async function getPublishedArticles(options?: {
         .from('articles')
         .select('*', { count: 'exact' })
         .eq('status', 'published')
-        .order('published_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (search) {
         query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%,subtitle.ilike.%${search}%`);
@@ -255,16 +255,13 @@ export async function getPublishedArticles(options?: {
 
   // 2. Fallback to Local DB
   const db = loadLocalDb();
-  const now = new Date().toISOString();
 
-  let filtered = db.articles.filter(
-    (a) => a.status === 'published' && (!a.published_at || a.published_at <= now)
-  );
+  let filtered = db.articles.filter((a) => a.status === 'published');
 
   // Sort newest first
   filtered.sort((a, b) => {
-    const dateA = a.published_at || a.created_at;
-    const dateB = b.published_at || b.created_at;
+    const dateA = a.created_at || a.published_at || '';
+    const dateB = b.created_at || b.published_at || '';
     return dateB.localeCompare(dateA);
   });
 
@@ -439,7 +436,7 @@ export async function saveArticle(input: Partial<Article> & { title: string }): 
     excerpt: (input.excerpt !== undefined ? input.excerpt : existing?.excerpt) || autoExcerpt || 'A personal reflection from Books&Wisdom.',
     content: rawContent,
     cover_image_path:
-      input.cover_image_path !== undefined
+      input.cover_image_path
         ? input.cover_image_path
         : existing?.cover_image_path || '/images/writings/self-reflection.webp',
     status: input.status || existing?.status || 'draft',

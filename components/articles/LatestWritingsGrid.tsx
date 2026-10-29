@@ -21,7 +21,7 @@ export function LatestWritingsGrid({ initialArticles }: LatestWritingsGridProps)
   // Background fetch to guarantee freshly published blogs show immediately even if cached by CDN
   useEffect(() => {
     let active = true;
-    fetch('/api/articles?limit=4', { cache: 'no-store' })
+    fetch('/api/articles?limit=8', { cache: 'no-store' })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (active && data && Array.isArray(data.articles) && data.articles.length > 0) {

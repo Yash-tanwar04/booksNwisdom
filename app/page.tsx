@@ -25,7 +25,7 @@ export const revalidate = 0;
 export default async function HomePage() {
   noStore();
   const settings = await getSiteSettings();
-  const { articles } = await getPublishedArticles({ limit: 4 });
+  const { articles } = await getPublishedArticles({ limit: 8 });
 
   return (
     <div className="relative min-h-screen overflow-hidden">
